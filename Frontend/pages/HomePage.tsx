@@ -263,7 +263,7 @@ const HomePage = () => {
             )}
 
             {!isLoadingData && processedProducts.length === 0 && (
-              <div className="text-center py-12 text-ink-light font-serif bg-transparent border border-dashed border-ink/20 p-8">
+              <div className="text-center py-12 text-ink-light font-serif">
                 {searchQuery ? (
                   <>
                     <p className="text-lg font-bold mb-2">Nie znaleziono produktu "{searchQuery}"</p>
