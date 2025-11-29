@@ -44,3 +44,12 @@ export interface UserProfile {
   role: 'CLIENT' | 'STORE';
   location?: string; // Tylko dla sklepów
 }
+
+export interface RankingEntry {
+  id: number;
+  name: string;
+  location: string;
+  score: number;
+  saved: number;
+}
+

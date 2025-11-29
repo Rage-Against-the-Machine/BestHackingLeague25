@@ -1,15 +1,27 @@
 
-import React from 'react';
-import { Trophy, Star, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trophy, Star, TrendingUp, Loader2 } from 'lucide-react';
+import { RankingEntry } from '../types';
+import { rankingService } from '../services/rankingService';
 
 const RankingView: React.FC = () => {
-  const rankingData = [
-    { id: 1, name: 'Biedronka', location: 'ul. Marszałkowska 10', score: 98, saved: 1240 },
-    { id: 2, name: 'Lidl', location: 'Al. Jerozolimskie 50', score: 95, saved: 980 },
-    { id: 3, name: 'Lokalny Warzywniak', location: 'Rynek Główny 5', score: 92, saved: 450 },
-    { id: 4, name: 'Carrefour', location: 'Złote Tarasy', score: 88, saved: 760 },
-    { id: 5, name: 'Żabka', location: 'ul. Poznańska 3', score: 85, saved: 320 },
-  ];
+  const [rankingData, setRankingData] = useState<RankingEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRanking = async () => {
+      try {
+        const data = await rankingService.getRanking();
+        setRankingData(data);
+      } catch (error) {
+        console.error("Failed to fetch ranking:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRanking();
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto mt-4 animate-in slide-in-from-bottom-4 duration-500">
@@ -32,40 +44,46 @@ const RankingView: React.FC = () => {
           <div className="col-span-2 text-right">Wynik</div>
         </div>
 
-        {/* List */}
-        <div className="space-y-3">
-          {rankingData.map((store, index) => (
-            <div key={store.id} className="grid grid-cols-12 gap-4 items-center p-3 border border-ink/10 hover:border-ink hover:bg-white transition-all group">
-              
-              {/* Rank */}
-              <div className="col-span-1 text-center font-serif font-black text-2xl text-ink/20 group-hover:text-accent transition-colors">
-                {index + 1}
-              </div>
-
-              {/* Store Info */}
-              <div className="col-span-6">
-                <div className="font-bold text-lg leading-none mb-1">{store.name}</div>
-                <div className="text-xs text-ink-light flex items-center gap-1">
-                   <MapPinIcon size={10} /> {store.location}
+        {/* List or Loader */}
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 size={48} className="animate-spin text-ink-light" />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {rankingData.map((store, index) => (
+              <div key={store.id} className="grid grid-cols-12 gap-4 items-center p-3 border border-ink/10 hover:border-ink hover:bg-white transition-all group">
+                
+                {/* Rank */}
+                <div className="col-span-1 text-center font-serif font-black text-2xl text-ink/20 group-hover:text-accent transition-colors">
+                  {index + 1}
                 </div>
-              </div>
 
-              {/* Stats */}
-              <div className="col-span-3 text-right font-sans">
-                <div className="font-bold">{store.saved} kg</div>
-              </div>
-
-              {/* Score */}
-              <div className="col-span-2 text-right">
-                <div className="inline-flex items-center gap-1 bg-ink text-paper px-2 py-1 text-sm font-bold">
-                  <Star size={12} className="fill-current" />
-                  {store.score}
+                {/* Store Info */}
+                <div className="col-span-6">
+                  <div className="font-bold text-lg leading-none mb-1">{store.name}</div>
+                  <div className="text-xs text-ink-light flex items-center gap-1">
+                     <MapPinIcon size={10} /> {store.location}
+                  </div>
                 </div>
-              </div>
 
-            </div>
-          ))}
-        </div>
+                {/* Stats */}
+                <div className="col-span-3 text-right font-sans">
+                  <div className="font-bold">{store.saved} kg</div>
+                </div>
+
+                {/* Score */}
+                <div className="col-span-2 text-right">
+                  <div className="inline-flex items-center gap-1 bg-ink text-paper px-2 py-1 text-sm font-bold">
+                    <Star size={12} className="fill-current" />
+                    {store.score}
+                  </div>
+                </div>
+
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Footer Note */}
         <div className="mt-8 pt-4 border-t border-dashed border-ink/30 text-center text-xs text-ink-light flex items-center justify-center gap-2">
@@ -96,3 +114,4 @@ const MapPinIcon = ({ size }: { size: number }) => (
 );
 
 export default RankingView;
+
