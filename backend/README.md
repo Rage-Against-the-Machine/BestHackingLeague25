@@ -65,3 +65,10 @@
     - ```status``` - Status message
     - ```store_points``` - current score for store
     - ```user_points``` - current score for user
+
+### ```/generate-qr``` [GET]
+- Arguments:
+    - ```username``` - username of user for which the QR code is generated
+- Returns:
+    - ```code``` - QR code for user
+    - ```username``` - username of user
