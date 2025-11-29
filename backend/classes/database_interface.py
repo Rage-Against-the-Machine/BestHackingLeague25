@@ -1,7 +1,7 @@
 import pymongo
 
-from user import User
-from store import Store
+from classes.user import User
+from classes.store import Store
 
 class DatabaseInterface:
     def __init__(self, host : str, database_name : str):
@@ -64,10 +64,13 @@ class DatabaseInterface:
     
     def update_prod_quantity(self, product):
         collection = self.database["stores"]
-        collection.update_one(
-            {"id": product.id},
-            {"$set": {"quantity": product.quantity}}
-        )
+        if product.quantity == 0:
+            collection.delete_one({"id": product.id})
+        else:
+            collection.update_one(
+                {"id": product.id},
+                {"$set": {"quantity": product.quantity}}
+            )
 
     def add_product(self, product):
         if len(self.find("products", {"id" : product.id})) == 0:
@@ -75,3 +78,7 @@ class DatabaseInterface:
             self.add(product_dict, "products")
         else:
             self.update_prod_quantity(product)
+
+    def delete(self, collection_name, query):
+        collection = self.database[collection_name]
+        collection.delete_one(query)

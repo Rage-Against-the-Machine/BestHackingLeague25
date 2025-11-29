@@ -1,5 +1,5 @@
-from store import Store
-from database_interface import DatabaseInterface
+from classes.store import Store
+from classes.database_interface import DatabaseInterface
 
 class Product:
     def __init__(self, name, series, price_original, price_users, exp_date, EAN, category, store : Store, quantity, photo_url):

@@ -1,18 +1,18 @@
-from utils import Location, merge_sort_ranking
+from classes.utils import Location, merge_sort_ranking
 
 class Store:
-    def __init__(self, id, name : str, location : Location):
+    def __init__(self, id, name : str, location : Location, points = 0):
         self.id = id
         self.name = name
         self.location = location
-        self.points = 0
+        self.points = points
 
     @classmethod
     def from_database(cls, doc):
         return cls(
             id = doc["id"],
             name = doc["name"],
-            location = doc["location"],
+            location = Location(doc["location"][0], doc["location"][1]),
             points = doc["points"]
         )
 
@@ -56,10 +56,17 @@ class StoresRanking:
         for record in self.current_ranking:
             result.append({
                 "place" : i, 
-                "name" : record.get_name(),
+                "name" : record.name,
                 "points" : record.get_points(),
                 "city" : record.get_location().get_city(),
                 "province" : record.get_location().get_province()
             })
             i = i + 1
         return result
+    
+def get_all_stores(database):
+    stores_records = database.get_all_stores()
+    stores_objects = []
+    for s in stores_records:
+        stores_objects.append(Store.from_database(s))
+    return stores_objects

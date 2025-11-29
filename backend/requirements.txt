@@ -1,2 +1,4 @@
 geopy
 pymongo
+flask
+flask-cors
