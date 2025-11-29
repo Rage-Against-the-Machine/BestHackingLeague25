@@ -3,10 +3,18 @@ from utils import Location, merge_sort_ranking
 from datetime import datetime
 
 class User:
-    def __init__(self, username : str, org_location : Location):
+    def __init__(self, username : str, org_location : Location, points = None):
         self.username = username
         self.org_location = org_location
-        self.points = 0
+        self.points = 0 if points == None else points
+
+    @classmethod
+    def from_database(cls, doc):
+        return cls(
+            username = doc["username"],
+            org_location = doc["location"],
+            points = doc["points"],
+        )
 
     def generate_qr_code(self):
         return f"{self.username}_{datetime.now().strftime('%Y%m%d%H%M')}"
@@ -31,8 +39,13 @@ class User:
             "points" : self.points
         })
     
+
 def get_all_users(database):
-    pass
+    users_records = database.get_all_users()
+    users_objects = []
+    for u in users_records:
+        users_objects.append(User.from_database(u))
+    return users_objects
 
 
 class UsersRanking:
