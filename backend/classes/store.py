@@ -59,10 +59,14 @@ class StoresRanking:
                 "name" : record.name,
                 "points" : record.get_points(),
                 "city" : record.get_location().get_city(),
-                "province" : record.get_location().get_province()
+                "province" : record.get_location().get_province(),
+                "coords" : record.get_location().get_coords()
             })
             i = i + 1
         return result
+    
+    def add_store(self, store):
+        self.stores.append(store)
     
 def get_all_stores(database):
     stores_records = database.get_all_stores()

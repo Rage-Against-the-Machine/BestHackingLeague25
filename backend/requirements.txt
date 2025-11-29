@@ -2,3 +2,5 @@ geopy
 pymongo
 flask
 flask-cors
+numpy
+requests

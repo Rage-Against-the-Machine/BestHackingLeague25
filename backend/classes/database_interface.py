@@ -81,4 +81,4 @@ class DatabaseInterface:
 
     def delete(self, collection_name, query):
         collection = self.database[collection_name]
-        collection.delete_one(query)
+        collection.delete_many(query)

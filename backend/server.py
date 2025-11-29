@@ -4,9 +4,9 @@ from classes.store import Store, StoresRanking, get_all_stores
 from classes.user import User, UsersRanking, get_all_users
 from classes.utils import Location
 
-import flask 
-import flask_cors
-import pymongo
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import numpy as np
 
 
 SERVING_PORT = 6969
@@ -18,21 +18,56 @@ users = get_all_users(database)
 products = get_all_products(database)
 stores = get_all_stores(database)
 
-# store_zabka = Store(0, "zabka", Location(51.1, 27.1))
-# database.add_store(store_zabka)
+app = Flask(__name__)
+CORS(app)
 
-# store_biedronka = Store(1, "biedronka", Location(51,27))
-# database.add_store(store_biedronka)
+user_ranking = UsersRanking(users)
+stores_ranking = StoresRanking(stores)
 
-store_zabka = stores[0]
+def store_id_available():
+    done = False
+    while not done:
+        id = np.random.randint(0, 100000)
+        if len(database.find("stores", { "id" : id})) == 0:
+            done = True
+            return id
 
-# store_zabka.add_points(100)
-# database.update_store_points(store_zabka)
+@app.route('/stores-ranking', methods=['GET'])
+def get_stores_ranking():
+    province = request.args.get('from', default=None, type=str)
+    if province == None:
+        results = stores_ranking.get_ranking_list()
+    else:
+        province_ranking = StoresRanking(stores, province)
+        results = province_ranking.get_ranking_list()
+    return jsonify(results)
 
-print(store_zabka.prepare_dict())
 
-stores = get_all_stores(database)
+@app.post('/add-store')
+def add_store():
+    data = request.get_json()
+    name = data.get("name")
+    location_raw = data.get("location")
 
-ranking = StoresRanking(stores)
+    location = Location(location_raw[0], location_raw[1])
 
-print(ranking.get_ranking_list())
+    id = store_id_available()
+
+    new_store = Store(id, name, location)
+    database.add_store(new_store)
+    stores.append(new_store)
+    stores_ranking.add_store(new_store)
+
+    return jsonify({
+        "status": "ok",
+        "received": {
+            "id" : id,
+            "name": name,
+            "location": location.get_coords(),
+            "city" : location.get_city()
+        }
+    }), 200
+
+
+
+app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
