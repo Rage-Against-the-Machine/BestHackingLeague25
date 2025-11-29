@@ -20,8 +20,6 @@ class Product:
         store = database.get_store(doc["store_id"])
         return cls(
             name = doc["name"],
-            location = doc["location"],
-            city = doc["city"],
             series = doc["series"],
             price_original = doc["price_original"],
             price_users = doc["price_users"],
