@@ -21,7 +21,6 @@ stores = get_all_stores(database)
 app = Flask(__name__)
 CORS(app)
 
-user_ranking = UsersRanking(users)
 stores_ranking = StoresRanking(stores)
 
 def store_id_available():
@@ -110,4 +109,54 @@ def add_product():
     }), 200
 
 
+@app.post('/buy-product')
+def buy_product():
+    global products
+    global database
+    global users
+    global stores
+    global user_ranking
+    global stores_ranking
+    data = request.get_json()
+    qr_code = data.get("code")
+    product_id = data.get("product_id")
+    quantity = int(data.get("quantity"))
+    store_id = data.get("store_id")
+
+    user = database.get_user_from_qr_code(qr_code)
+    store = database.get_store(store_id)
+    product = database.get_product(product_id)
+
+    score = product.calculate_score_for_one() * quantity
+    store.add_points(score)
+    user.add_points(product, quantity)
+    product.update_quantity((-1)*quantity)
+    database.update_prod_quantity(product, addition=False)
+
+    database.update_user_points(user)
+    database.update_store_points(store)
+
+    products = get_all_products(database)
+    users = get_all_users(database)
+    stores = get_all_stores(database)
+
+    stores_ranking = StoresRanking(stores)
+
+    return jsonify({
+        "status": "ok",
+        "store_points" : store.get_points(),
+        "users_points" : user.get_points()
+        }), 200
+
+
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
+
+# from classes.qr_codes import QR_code
+# qr_code = QR_code(users[0])
+# database.add_qr_code(qr_code)
+
+# print(database.find("qr_codes", {}))
+
+# user_1 = database.find("users", {"username" : "roszczyk"})[0]
+# user_1 = User.from_database(user_1)
+# print(user_1.get_points())

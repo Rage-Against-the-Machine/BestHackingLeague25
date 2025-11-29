@@ -19,7 +19,10 @@ class User:
     def generate_qr_code(self):
         return f"{self.username}_{datetime.now().strftime('%Y%m%d%H%M')}"
     
-    def add_points(self, points):
+    def add_points(self, product, quantity):
+        unit_saved_money = product.price_original - product.price_users
+        saved_money = quantity * unit_saved_money
+        points = int(saved_money * 100)
         self.points = self.points + points
 
     def get_points(self):

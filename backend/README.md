@@ -50,3 +50,18 @@
     - ```store_id``` - ID of the store registering the product
     - ```quantity``` - quantity of the product
     - ```photo_url``` - URL to product's image
+
+### ```/buy-product``` [POST]
+- Arguments:
+    - ```code``` - user's QR code
+    - ```product_id``` - bought product's ID
+    - ```quantity``` - number of product items bought by user
+    - ```store_id``` - ID of selling store
+- Actions:
+    - adds points for user
+    - adds points for store
+    - reduces the amount of available product items
+- Returns:
+    - ```status``` - Status message
+    - ```store_points``` - current score for store
+    - ```user_points``` - current score for user
