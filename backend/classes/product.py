@@ -13,7 +13,7 @@ class Product:
         self.store = store
         self.quantity = quantity
         self.photo_url = photo_url
-        self.id = f"{self.store.id}_{self.EAN}_{self.series}"
+        self.id = f"{self.store.id}_{self.EAN}_{self.series}_{round(100*float(self.price_users))}"
 
     @classmethod
     def from_database(cls, doc, database : DatabaseInterface):

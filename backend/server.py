@@ -79,6 +79,7 @@ def get_products():
 
 @app.post('/add-product')
 def add_product():
+    global products
     data = request.get_json()
     name = data.get("name")
     series = data.get("series")
@@ -96,7 +97,7 @@ def add_product():
                         category, store, quantity, photo_url)
     
     database.add_product(new_product)
-    products.append(new_product)
+    products = get_all_products(database)
 
     return jsonify({
         "status": "ok",

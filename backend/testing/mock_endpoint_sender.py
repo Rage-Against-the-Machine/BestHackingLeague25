@@ -43,6 +43,7 @@ def send_to_endpoint_product(
 
 
 # send_to_endpoint_store("http://localhost:6969/add-store", "truskawka", (54,69))
+
 resp = send_to_endpoint_product(
     "http://localhost:6969/add-product",
     name="Coca Cola",
