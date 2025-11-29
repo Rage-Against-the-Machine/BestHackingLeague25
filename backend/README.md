@@ -1,0 +1,52 @@
+# Backend
+
+## Available endpoints
+
+### ```/stores-ranking``` [GET]
+- Arguments: 
+    - ```province``` - in Poland województwo, if you want a regional ranking. Optional.
+- Returns:
+    - ranking of stores in the correct order
+    - following stores info:
+        - name (```name```)
+        - points (```points```)
+        - city (location) (```city```)
+        - province (location) (```province```)
+        - coords (location) (```coords```)
+        - store ID (```store_id```)
+
+### ```/add-store``` [POST]
+- Arguments:
+    - ```name``` - store's name
+    - ```location``` - location coords as ```[lat, lon]```
+- Adds the store to the system
+
+### ```/products``` [GET]
+- Arguments: None
+- Returns:
+    - list of all products with following products info:
+        - id (```id```)
+        - name (```name```)
+        - location - coords (```location```)
+        - location - city (```city```)
+        - series (```series```)
+        - original price (```price_original```)
+        - price for registered users (```price_users```)
+        - expiration date (```exp_date```)
+        - category (```category```)
+        - store id (```store_id```)
+        - quantity (```quantity```)
+        - photo_url (```photo_url```)
+
+### ```/add-product``` [POST]
+- Arguments:
+    - ```name``` - product's name
+    - ```series``` - product's series
+    - ```price_original``` - original price
+    - ```price_users``` - price for registered users
+    - ```exp_date``` - expiration date
+    - ```EAN``` - EAN code
+    - ```category``` - product's category
+    - ```store_id``` - ID of the store registering the product
+    - ```quantity``` - quantity of the product
+    - ```photo_url``` - URL to product's image
