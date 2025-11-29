@@ -75,7 +75,7 @@ def send_buy_product_request(url, code, product_id, quantity, store_id):
 
 resp = send_buy_product_request(
     "http://localhost:6969/buy-product",
-    code='roszczyk_20251129232441',
+    code="roszczyk_20251129235954",
     product_id="0_1234567890123_Classic_499",
     quantity=5,
     store_id=0

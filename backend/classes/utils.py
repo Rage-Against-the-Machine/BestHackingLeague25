@@ -7,20 +7,26 @@ class Location:
         self.geointerpreter = Nominatim(user_agent="geoapi")
     
     def get_city(self):
-        location = self.geointerpreter.reverse((self.lat, self.lon), language="en")
-        address = location.raw.get("address", {})
-        
-        return (address.get("city") or
-                address.get("town") or
-                address.get("village") or
-                address.get("hamlet") or
-                "Unknown")
+        try:
+            location = self.geointerpreter.reverse((self.lat, self.lon), language="en")
+            address = location.raw.get("address", {})
+            
+            return (address.get("city") or
+                    address.get("town") or
+                    address.get("village") or
+                    address.get("hamlet") or
+                    "Unknown")
+        except Exception:
+            return "Unknown"
     
     def get_province(self):
-        location = self.geointerpreter.reverse((self.lat, self.lon), language="en")
-        address = location.raw.get("address", {})
-        
-        return address.get("state") or address.get("region") or "Unknown"
+        try:
+            location = self.geointerpreter.reverse((self.lat, self.lon), language="en")
+            address = location.raw.get("address", {})
+            
+            return address.get("state") or address.get("region") or "Unknown"
+        except Exception:
+            return "Unknown"
     
     def get_coords(self):
         return (self.lat, self.lon)

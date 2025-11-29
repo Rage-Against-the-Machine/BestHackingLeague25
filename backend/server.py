@@ -3,6 +3,7 @@ from classes.product import Product, get_all_products
 from classes.store import Store, StoresRanking, get_all_stores
 from classes.user import User, UsersRanking, get_all_users
 from classes.utils import Location
+from classes.qr_codes import QR_code
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -115,7 +116,6 @@ def buy_product():
     global database
     global users
     global stores
-    global user_ranking
     global stores_ranking
     data = request.get_json()
     qr_code = data.get("code")
@@ -147,6 +147,19 @@ def buy_product():
         "store_points" : store.get_points(),
         "users_points" : user.get_points()
         }), 200
+
+
+@app.route('/generate-qr', methods=['GET'])
+def generate_qr():
+    username = request.args.get('username', default=None, type=str)
+    user = database.get_user(username)
+    qr_code = QR_code(user)
+    database.add_qr_code(qr_code)
+
+    return jsonify({
+        "username" : user.username,
+        "code" : qr_code.code
+    })
 
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
