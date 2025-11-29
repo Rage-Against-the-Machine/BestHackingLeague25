@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Product, ProductCategory } from '../types';
-import { Plus, Package, Calendar, DollarSign, Image as ImageIcon, Edit2, Trash2, ArrowLeft, TrendingUp, AlertTriangle, CheckCircle, Save, Filter, ArrowUpDown } from 'lucide-react';
+import { Plus, Package, Calendar, DollarSign, Image as ImageIcon, Edit2, Trash2, ArrowLeft, TrendingUp, AlertTriangle, CheckCircle, Save, Filter, ArrowUpDown, Hash } from 'lucide-react';
 
 interface StorePanelProps {
   storeName: string;
@@ -12,7 +12,7 @@ interface StorePanelProps {
 }
 
 type Mode = 'DASHBOARD' | 'FORM';
-type SortMode = 'DEFAULT' | 'PRICE_ASC' | 'PRICE_DESC' | 'EXPIRY_SOON';
+type SortMode = 'DEFAULT' | 'PRICE_ASC' | 'PRICE_DESC' | 'EXPIRY_SOON' | 'QTY_ASC' | 'QTY_DESC';
 
 const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProduct, onUpdateProduct, onDeleteProduct }) => {
   const [mode, setMode] = useState<Mode>('DASHBOARD');
@@ -55,6 +55,12 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
       case 'EXPIRY_SOON':
         result.sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
         break;
+      case 'QTY_ASC':
+        result.sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
+        break;
+      case 'QTY_DESC':
+        result.sort((a, b) => (b.quantity || 0) - (a.quantity || 0));
+        break;
       default:
         // Default: Newest added (assuming ID correlates roughly to time or reverse list)
         result.reverse(); 
@@ -71,6 +77,7 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
     originalPrice: '',
     discountPrice: '',
     expiryDays: 1,
+    quantity: 1,
     imageUrl: ''
   });
 
@@ -87,6 +94,7 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
         originalPrice: product.originalPrice.toString(),
         discountPrice: product.discountPrice.toString(),
         expiryDays: daysLeft > 0 ? daysLeft : 1,
+        quantity: product.quantity || 1,
         imageUrl: product.imageUrl || ''
       });
     } else {
@@ -97,6 +105,7 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
         originalPrice: '',
         discountPrice: '',
         expiryDays: 1,
+        quantity: 1,
         imageUrl: ''
       });
     }
@@ -117,6 +126,7 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
       category: formData.category,
       originalPrice: original,
       discountPrice: discount,
+      quantity: formData.quantity,
       discountPercentage: Math.round(((original - discount) / original) * 100),
       expiryDate: new Date(Date.now() + (formData.expiryDays * 86400000)).toISOString(),
       storeName: storeName || 'Twój Sklep',
@@ -226,18 +236,33 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-xs font-black uppercase tracking-widest mb-2 text-ink">Ważne przez (dni)</label>
-                <div className="relative">
-                   <Calendar size={16} className="absolute left-3 top-4 text-ink-light" />
-                   <input 
-                      type="number"
-                      min="1"
-                      max="30"
-                      value={formData.expiryDays}
-                      onChange={e => setFormData({...formData, expiryDays: parseInt(e.target.value)})}
-                      className="w-full bg-white text-ink border-2 border-ink p-3 pl-9 focus:outline-none focus:border-accent"
-                   />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest mb-2 text-ink">Ilość (szt.)</label>
+                  <div className="relative">
+                    <Hash size={16} className="absolute left-3 top-4 text-ink-light" />
+                    <input 
+                        type="number"
+                        min="1"
+                        value={formData.quantity}
+                        onChange={e => setFormData({...formData, quantity: parseInt(e.target.value)})}
+                        className="w-full bg-white text-ink border-2 border-ink p-3 pl-9 focus:outline-none focus:border-accent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest mb-2 text-ink">Ważne (dni)</label>
+                  <div className="relative">
+                    <Calendar size={16} className="absolute left-3 top-4 text-ink-light" />
+                    <input 
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={formData.expiryDays}
+                        onChange={e => setFormData({...formData, expiryDays: parseInt(e.target.value)})}
+                        className="w-full bg-white text-ink border-2 border-ink p-3 pl-9 focus:outline-none focus:border-accent"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -344,6 +369,8 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
                      <option value="DEFAULT" className="text-ink">Domyślne</option>
                      <option value="PRICE_ASC" className="text-ink">Cena: Rosnąco</option>
                      <option value="PRICE_DESC" className="text-ink">Cena: Malejąco</option>
+                     <option value="QTY_ASC" className="text-ink">Ilość: Rosnąco</option>
+                     <option value="QTY_DESC" className="text-ink">Ilość: Malejąco</option>
                      <option value="EXPIRY_SOON" className="text-ink">Ważność: Najkrótsza</option>
                   </select>
                </div>
@@ -365,6 +392,7 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
                      <th className="p-4 w-1/3 border-r border-ink/10">Produkt</th>
                      <th className="p-4 border-r border-ink/10">Kategoria</th>
                      <th className="p-4 whitespace-nowrap border-r border-ink/10">Ważność</th>
+                     <th className="p-4 whitespace-nowrap border-r border-ink/10">Ilość</th>
                      <th className="p-4 whitespace-nowrap border-r border-ink/10">Cena</th>
                      <th className="p-4 text-center">Akcje</th>
                   </tr>
@@ -372,7 +400,7 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
                <tbody className="divide-y divide-ink/10">
                   {displayedProducts.length === 0 ? (
                      <tr>
-                        <td colSpan={5} className="p-12 text-center text-ink-light italic bg-white">
+                        <td colSpan={6} className="p-12 text-center text-ink-light italic bg-white">
                            {products.length === 0 
                              ? 'Twój magazyn jest pusty. Dodaj pierwszy produkt.' 
                              : 'Brak wyników dla wybranych filtrów.'}
@@ -400,6 +428,9 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
                                  {isUrgent ? <AlertTriangle size={14} /> : <CheckCircle size={14} />}
                                  {new Date(product.expiryDate).toLocaleDateString()}
                               </div>
+                           </td>
+                           <td className="p-4 font-sans text-sm font-medium text-ink border-r border-ink/5 text-center">
+                              {product.quantity} szt.
                            </td>
                            <td className="p-4 whitespace-nowrap border-r border-ink/5">
                               <div className="flex flex-col">
