@@ -57,7 +57,8 @@ class DatabaseInterface:
         )
 
     def get_store(self, id) -> Store:
-        return self.find("stores", {"id" : id})[0]
+        store = Store.from_database(self.find("stores", {"id" : id})[0])
+        return store
     
     def get_all_products(self):
         return self.find("products", {})

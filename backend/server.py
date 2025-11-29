@@ -34,7 +34,7 @@ def store_id_available():
 
 @app.route('/stores-ranking', methods=['GET'])
 def get_stores_ranking():
-    province = request.args.get('from', default=None, type=str)
+    province = request.args.get('province', default=None, type=str)
     if province == None:
         results = stores_ranking.get_ranking_list()
     else:
@@ -68,6 +68,45 @@ def add_store():
         }
     }), 200
 
+
+@app.route('/products', methods=['GET'])
+def get_products():
+    output_list = []
+    for prod in products:
+        output_list.append(prod.prepare_dict())
+    return jsonify(output_list)
+
+
+@app.post('/add-product')
+def add_product():
+    data = request.get_json()
+    name = data.get("name")
+    series = data.get("series")
+    price_original = data.get("price_original")
+    price_users = data.get("price_users")
+    exp_date = data.get("exp_date")
+    EAN = data.get("EAN")
+    category = data.get("category")
+    store_id = data.get("store_id")
+    quantity = data.get("quantity")
+    photo_url = data.get("photo_url", "None")
+
+    store = database.get_store(store_id)
+    new_product = Product(name, series, price_original, price_users, exp_date, EAN, 
+                        category, store, quantity, photo_url)
+    
+    database.add_product(new_product)
+    products.append(new_product)
+
+    return jsonify({
+        "status": "ok",
+        "received": {
+            "id" : new_product.id, 
+            "EAN" : new_product.EAN, 
+            "quantity" : new_product.quantity,
+            "store_name" : new_product.store.name
+        }
+    }), 200
 
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)

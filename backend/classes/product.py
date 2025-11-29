@@ -13,7 +13,7 @@ class Product:
         self.store = store
         self.quantity = quantity
         self.photo_url = photo_url
-        self.id = f"{self.store}_{self.EAN}_{self.series}"
+        self.id = f"{self.store.id}_{self.EAN}_{self.series}"
 
     @classmethod
     def from_database(cls, doc, database : DatabaseInterface):
@@ -60,5 +60,5 @@ def get_all_products(database : DatabaseInterface):
     product_records = database.get_all_products()
     product_objects = []
     for rec in product_records:
-        product_objects.append(Product.from_database(rec))
+        product_objects.append(Product.from_database(rec, database))
     return product_objects
