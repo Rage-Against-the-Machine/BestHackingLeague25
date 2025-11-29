@@ -7,6 +7,15 @@ class Store:
         self.location = location
         self.points = 0
 
+    @classmethod
+    def from_database(cls, doc):
+        return cls(
+            id = doc["id"],
+            name = doc["name"],
+            location = doc["location"],
+            points = doc["points"]
+        )
+
     def prepare_dict(self):
         return dict({
             "id" : self.id,

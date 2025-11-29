@@ -55,3 +55,23 @@ class DatabaseInterface:
             {"id": store.id},
             {"$set": {"points": store.get_points()}}
         )
+
+    def get_store(self, id) -> Store:
+        return self.find("stores", {"id" : id})[0]
+    
+    def get_all_products(self):
+        return self.find("products", {})
+    
+    def update_prod_quantity(self, product):
+        collection = self.database["stores"]
+        collection.update_one(
+            {"id": product.id},
+            {"$set": {"quantity": product.quantity}}
+        )
+
+    def add_product(self, product):
+        if len(self.find("products", {"id" : product.id})) == 0:
+            product_dict = product.prepare_dict()
+            self.add(product_dict, "products")
+        else:
+            self.update_prod_quantity(product)
