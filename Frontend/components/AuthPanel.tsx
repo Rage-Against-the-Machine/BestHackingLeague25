@@ -1,20 +1,17 @@
 
 import React, { useState } from 'react';
 import { User, Store, ArrowRight, Lock, Mail, MapPin, AlertCircle } from 'lucide-react';
-import { userService } from '../services/userService';
-
-interface AuthPanelProps {
-  onLoginSuccess: (role: 'CLIENT' | 'STORE', name: string) => void;
-}
+import { useAuth } from '../contexts/AuthContext';
 
 type AuthMode = 'LOGIN' | 'REGISTER';
 type Role = 'CLIENT' | 'STORE';
 
-const AuthPanel: React.FC<AuthPanelProps> = ({ onLoginSuccess }) => {
+const AuthPanel: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('LOGIN');
   const [role, setRole] = useState<Role>('CLIENT');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { login, register, isLoading } = useAuth();
 
   // Form States
   const [email, setEmail] = useState('');
@@ -24,38 +21,29 @@ const AuthPanel: React.FC<AuthPanelProps> = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
 
     try {
       if (mode === 'LOGIN') {
-        const user = await userService.login(email, password);
-        onLoginSuccess(user.role, user.name);
+        await login(email, password);
       } else {
-        const user = await userService.register(email, password, name, role, location);
-        onLoginSuccess(user.role, user.name);
+        await register(email, password, name, role, location);
       }
     } catch (err: any) {
       setError(err.message || "Wystąpił błąd autoryzacji.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleDemoLogin = async (demoRole: Role) => {
-    setIsLoading(true);
     setError(null);
     try {
-        if (demoRole === 'CLIENT') {
-            const user = await userService.login('jan@zerowaste.pl', 'user123');
-            onLoginSuccess(user.role, user.name);
-        } else {
-            const user = await userService.login('sklep@zerowaste.pl', 'store123');
-            onLoginSuccess(user.role, user.name);
-        }
+      if (demoRole === 'CLIENT') {
+        await login('jan@zerowaste.pl', 'user123');
+      } else {
+        await login('sklep@zerowaste.pl', 'store123');
+      }
     } catch (err: any) {
         setError("Błąd logowania demo: " + err.message);
-        setIsLoading(false);
     }
   };
 
