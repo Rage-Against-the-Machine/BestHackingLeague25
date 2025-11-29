@@ -13,7 +13,7 @@ class User:
         return cls(
             username = doc["username"],
             org_location = doc["location"],
-            points = doc["points"],
+            points = doc["points"]
         )
 
     def generate_qr_code(self):
