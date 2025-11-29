@@ -20,9 +20,6 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ isOpen, onClose
         <p className="text-lg font-bold text-ink mb-2">
           Czy na pewno chcesz usunąć ten produkt?
         </p>
-        <p className="text-sm text-ink-light mb-6 font-serif italic">
-          "{productName}"
-        </p>
         <p className="text-xs text-ink-light mb-6">
           Tej operacji nie można cofnąć. Produkt zostanie trwale usunięty z gazetki.
         </p>
