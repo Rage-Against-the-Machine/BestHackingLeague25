@@ -60,7 +60,8 @@ class StoresRanking:
                 "points" : record.get_points(),
                 "city" : record.get_location().get_city(),
                 "province" : record.get_location().get_province(),
-                "coords" : record.get_location().get_coords()
+                "coords" : record.get_location().get_coords(),
+                "store_id" : record.id
             })
             i = i + 1
         return result
