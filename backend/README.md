@@ -74,3 +74,13 @@ PORT = ```6969```
 - Returns:
     - ```code``` - QR code for user
     - ```username``` - username of user
+
+
+### ```/get-user``` [GET]
+- Arguments:
+    - ```username``` - username of user for which the QR code is generated
+- Returns:
+    - ```username``` - username of user
+    - ```email``` - email of user
+    - ```password``` - user's password
+    - ```points``` - user's points

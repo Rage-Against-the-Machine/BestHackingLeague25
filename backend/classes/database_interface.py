@@ -38,7 +38,11 @@ class DatabaseInterface:
         self.add(store_dict, "stores")
 
     def get_all_users(self):
-        return self.find("users", {})
+        users = self.find("users", {})
+        if len(users) > 0:
+            return users
+        else:
+            return []
     
     def get_user(self, username):
         user_raw = self.find("users", {"username" : username})[0]
