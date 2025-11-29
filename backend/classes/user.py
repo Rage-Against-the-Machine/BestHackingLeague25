@@ -3,16 +3,18 @@ from classes.utils import Location, merge_sort_ranking
 from datetime import datetime
 
 class User:
-    def __init__(self, username : str, org_location : Location, points = None):
+    def __init__(self, username : str, email : str, password : str, points = None):
         self.username = username
-        self.org_location = org_location
+        self.email = email
+        self.password = password
         self.points = 0 if points == None else points
 
     @classmethod
     def from_database(cls, doc):
         return cls(
             username = doc["username"],
-            org_location = Location(doc["location"][0], doc["location"][1]),
+            email = doc["email"],
+            password = doc["password"],
             points = doc["points"]
         )
 
@@ -37,8 +39,8 @@ class User:
     def prepare_dict(self):
         return dict({
             "username" : self.username,
-            "location" : self.org_location.get_coords(),
-            "city" : self.org_location.get_city(),
+            "password" : self.password,
+            "email" : self.email,
             "points" : self.points
         })
     

@@ -162,6 +162,14 @@ def generate_qr():
     })
 
 
+@app.route('/get-user', methods=["GET"])
+def get_user_info():
+    username = request.args.get('username', default=None, type=str)
+    user = database.get_user(username)
+    user_dict = user.prepare_dict()
+    return jsonify(user_dict)
+
+
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
 
 # from classes.qr_codes import QR_code
@@ -173,3 +181,7 @@ app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
 # user_1 = database.find("users", {"username" : "roszczyk"})[0]
 # user_1 = User.from_database(user_1)
 # print(user_1.get_points())
+
+# user_1 = User("roszczyk", "roszczyk@mock", "dupa")
+# database.add_user(user_1)
+# print(database.get_all_users())
