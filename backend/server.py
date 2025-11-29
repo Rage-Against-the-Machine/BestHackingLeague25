@@ -170,6 +170,17 @@ def get_user_info():
     return jsonify(user_dict)
 
 
+@app.route('/validate-user', methods=["GET"])
+def validate_user():
+    username = request.args.get('username', default=None, type=str)
+    password = request.args.get('password', default=None, type=str)
+    user = database.get_user(username)
+    if password == user.password:
+        return jsonify({"validated?" : "true"})
+    else:
+        return jsonify({"validated?" : "false"})
+
+
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
 
 # from classes.qr_codes import QR_code

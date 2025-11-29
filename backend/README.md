@@ -82,5 +82,4 @@ PORT = ```6969```
 - Returns:
     - ```username``` - username of user
     - ```email``` - email of user
-    - ```password``` - user's password
     - ```points``` - user's points
