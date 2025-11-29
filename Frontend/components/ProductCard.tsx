@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Product } from '../types';
-import { Clock, MapPin, Store, Navigation } from 'lucide-react';
+import { Clock, MapPin, Store, Navigation, Hash } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -91,6 +91,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, distance }) => {
                  {relativeDateText}
                </span>
             </div>
+            {product.quantity && (
+              <div className="flex items-center gap-1">
+                <Hash size={12} />
+                <span className="uppercase tracking-wide text-[10px] font-bold">
+                  {product.quantity} szt.
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -114,5 +122,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, distance }) => {
     </div>
   );
 };
+
 
 export default ProductCard;

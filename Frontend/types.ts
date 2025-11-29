@@ -10,6 +10,7 @@ export interface Product {
   storeLocation: string;
   imageUrl?: string;
   discountPercentage: number;
+  quantity?: number;
   coordinates?: {
     lat: number;
     lng: number;
