@@ -1,4 +1,4 @@
-from utils import Location, merge_sort_ranking
+from classes.utils import Location, merge_sort_ranking
 
 from datetime import datetime
 

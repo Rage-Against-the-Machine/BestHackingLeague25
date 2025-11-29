@@ -1,0 +1,20 @@
+services: 
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+    networks:
+      - hackathon_network
+
+networks:
+  hackathon_network:
+    driver: bridge
+
+volumes:
+  mongo_data:
