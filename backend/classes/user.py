@@ -12,7 +12,7 @@ class User:
     def from_database(cls, doc):
         return cls(
             username = doc["username"],
-            org_location = doc["location"],
+            org_location = Location(doc["location"][0], doc["location"][1]),
             points = doc["points"]
         )
 
