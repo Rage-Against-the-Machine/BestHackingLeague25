@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Product, ProductCategory } from '../types';
 import Modal from './Modal';
-import { Plus, Save, Calendar, DollarSign, Image as ImageIcon, Hash } from 'lucide-react';
+import { Plus, Save, Calendar, DollarSign, Hash } from 'lucide-react';
+import ImageUploader from './ImageUploader';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -69,7 +69,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
       expiryDate: new Date(Date.now() + (formData.expiryDays * 86400000)).toISOString(),
       storeName: storeName,
       storeLocation: editingProduct ? editingProduct.storeLocation : 'Warszawa (Centrum)',
-      imageUrl: formData.imageUrl || `https://picsum.photos/600/400?random=${Date.now()}`,
+      imageUrl: formData.imageUrl,
       coordinates: editingProduct ? editingProduct.coordinates : defaultCoords
     };
 
@@ -80,6 +80,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={editingProduct ? 'Edytuj Ofertę' : 'Dodaj Produkt'}>
       <form onSubmit={handleSubmit} className="space-y-6">
+        
+        <ImageUploader 
+          initialImageUrl={formData.imageUrl}
+          onUploadComplete={(url) => setFormData({ ...formData, imageUrl: url })}
+        />
+
         <div>
           <label className="block text-xs font-black uppercase tracking-widest mb-2 text-ink">Nazwa Produktu</label>
           <input 
@@ -164,22 +170,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
             </div>
           </div>
         </div>
-        <div>
-          <label className="block text-xs font-black uppercase tracking-widest mb-2 text-ink">Zdjęcie (URL)</label>
-          <div className="relative">
-              <ImageIcon size={16} className="absolute left-3 top-4 text-ink-light" />
-              <input 
-                type="url"
-                value={formData.imageUrl}
-                onChange={e => setFormData({...formData, imageUrl: e.target.value})}
-                className="w-full bg-white text-ink border-2 border-ink p-3 pl-9 focus:outline-none focus:border-accent placeholder:text-gray-300 text-sm"
-                placeholder="https://example.com/image.jpg"
-              />
-          </div>
-        </div>
+        
         <button 
           type="submit"
-          className="w-full bg-ink text-white font-bold uppercase tracking-widest py-4 mt-6 hover:bg-accent transition-colors flex items-center justify-center gap-2 shadow-paper hover:shadow-paper-hover hover:-translate-y-1 text-sm"
+          className="w-full bg-ink text-white font-bold uppercase tracking-widest py-4 mt-6 hover:bg-accent transition-colors flex items-center justify-center gap-2"
         >
           {editingProduct ? <Save size={20} /> : <Plus size={20} />}
           {editingProduct ? 'Zapisz Zmiany' : 'Dodaj do Gazetki'}
