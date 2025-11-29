@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/theme/app_colors.dart';
 import 'package:mobile_app/core/theme/app_typography.dart';
+import 'package:mobile_app/features/products/model/product.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({super.key});
+  final Product product;
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class ProductCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
-                    'Pierogi z grzybami',
+                    product.name,
                     style: AppTypography.productLabel,
                     textAlign: TextAlign.center,
                   ),
@@ -52,7 +54,7 @@ class ProductCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                         SizedBox(width: 4),
-                        Text('Pierdonka', style: AppTypography.caption),
+                        Text(product.storeId, style: AppTypography.caption),
                       ],
                     ),
                     Row(
@@ -64,7 +66,7 @@ class ProductCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         Text(
-                          'ul. Mazowiecka 17 (2.7km)',
+                          product.location['city'] ?? 'Dupczewo',
                           style: AppTypography.caption,
                         ),
                       ],
@@ -77,7 +79,7 @@ class ProductCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                         SizedBox(width: 4),
-                        Text('11.11.2025', style: AppTypography.caption),
+                        Text(product.expDate, style: AppTypography.caption),
                       ],
                     ),
                   ],

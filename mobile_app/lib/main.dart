@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
   UserViewModel userViewModel = UserViewModel();
 
   late final List<Widget> _pages = [
-    const ProductsPage(),
+    ProductsPage(),
     MapPage(),
     UserPage(userViewModel: userViewModel),
   ];
