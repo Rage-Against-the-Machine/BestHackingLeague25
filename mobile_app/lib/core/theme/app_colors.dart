@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const highlight = Color(0xf4e7c3ff);
-  static const accent = Color(0xd94e33ff);
+  static const accent = Color.fromARGB(255, 255, 72, 72);
 
   static const background = Color.fromARGB(255, 240, 235, 228);
   static const productBackground = Color.fromARGB(255, 253, 251, 247);
