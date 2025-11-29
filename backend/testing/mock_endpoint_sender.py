@@ -41,21 +41,44 @@ def send_to_endpoint_product(
     response = requests.post(url, json=payload)
     return response
 
+def send_buy_product_request(url, code, product_id, quantity, store_id):
+    payload = {
+        "code": code,
+        "product_id": product_id,
+        "quantity": quantity,
+        "store_id": store_id
+    }
+
+    print(payload)
+
+    response = requests.post(url, json=payload)
+    return response
 
 # send_to_endpoint_store("http://localhost:6969/add-store", "truskawka", (54,69))
 
-resp = send_to_endpoint_product(
-    "http://localhost:6969/add-product",
-    name="Coca Cola",
-    series="Classic",
-    price_original=5.99,
-    price_users=4.99,
-    exp_date="2025-12-01",
-    EAN="1234567890123",
-    category="Drinks",
-    store_id=0,
-    quantity=10,
-    photo_url="https://example.com/photo.jpg"
+# resp = send_to_endpoint_product(
+#     "http://localhost:6969/add-product",
+#     name="Coca Cola",
+#     series="Classic",
+#     price_original=5.99,
+#     price_users=4.99,
+#     exp_date="2025-12-01",
+#     EAN="1234567890123",
+#     category="Drinks",
+#     store_id=0,
+#     quantity=10,
+#     photo_url="https://example.com/photo.jpg"
+# )
+
+# print(resp.status_code)
+# print(resp.json())
+
+resp = send_buy_product_request(
+    "http://localhost:6969/buy-product",
+    code='roszczyk_20251129232441',
+    product_id="0_1234567890123_Classic_499",
+    quantity=5,
+    store_id=0
 )
 
 print(resp.status_code)

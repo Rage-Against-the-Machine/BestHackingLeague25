@@ -2,6 +2,7 @@ import pymongo
 
 from classes.user import User
 from classes.store import Store
+from classes.qr_codes import QR_code
 
 class DatabaseInterface:
     def __init__(self, host : str, database_name : str):
@@ -39,6 +40,11 @@ class DatabaseInterface:
     def get_all_users(self):
         return self.find("users", {})
     
+    def get_user(self, username):
+        user_raw = self.find("users", {"username" : username})[0]
+        user = User.from_database(user_raw)
+        return user
+    
     def update_user_points(self, user : User):
         collection = self.database["users"]
         collection.update_one(
@@ -63,21 +69,26 @@ class DatabaseInterface:
     def get_all_products(self):
         return self.find("products", {})
     
-    def update_prod_quantity(self, product):
+    def update_prod_quantity(self, product, addition = True):
         collection = self.database["products"]
-        if product.quantity == 0:
-            collection.delete_one({"id": product.id})
+        if addition:
+            if product.quantity == 0:
+                collection.delete_one({"id": product.id})
+            else:
+                from classes.product import Product
+                current_prod = Product.from_database(self.find("products", {"id": product.id})[0], self)
+                collection.update_one(
+                    {"id": current_prod.id},
+                    {"$set": {"quantity": current_prod.quantity + product.quantity}}
+                )
         else:
-            from classes.product import Product
-            current_prod = Product.from_database(self.find("products", {"id": product.id})[0], self)
             collection.update_one(
-                {"id": current_prod.id},
-                {"$set": {"quantity": current_prod.quantity + product.quantity}}
-            )
+                    {"id": product.id},
+                    {"$set": {"quantity": product.quantity}}
+                )
+
 
     def add_product(self, product):
-        print(len(self.find("products", {"id" : product.id})))
-        print(self.find("products", {"id" : product.id}))
         if len(self.find("products", {"id" : product.id})) == 0:
             product_dict = product.prepare_dict()
             self.add(product_dict, "products")
@@ -87,3 +98,20 @@ class DatabaseInterface:
     def delete(self, collection_name, query):
         collection = self.database[collection_name]
         collection.delete_many(query)
+
+    def add_qr_code(self, code : QR_code):
+        if len(self.find("qr_codes", {"code" : code.code})) == 0:
+            self.add(code.prepare_dict(), "qr_codes")
+
+    def get_user_from_qr_code(self, code_raw : str) -> User:
+        if len(self.find("qr_codes", {"code" : code_raw})) != 0:
+            code_found = self.find("qr_codes", {"code" : code_raw})[0]
+            code = QR_code.from_database(code_found, self)
+            return code.user
+        
+    def get_product(self, product_id):
+        from classes.product import Product
+        raw_product = self.find("products", {"id" : product_id})[0]
+        product = Product.from_database(raw_product, self)
+        return product
+

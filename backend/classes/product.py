@@ -55,6 +55,12 @@ class Product:
             "photo_url" : self.photo_url
         })
     
+    def calculate_score_for_one(self):
+        return round(((self.price_original - self.price_users)/self.price_original)*10)
+    
+    def update_quantity(self, difference : int):
+        self.quantity = self.quantity + difference
+    
 
 def get_all_products(database : DatabaseInterface):
     product_records = database.get_all_products()
