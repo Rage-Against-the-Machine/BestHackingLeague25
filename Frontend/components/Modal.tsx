@@ -28,11 +28,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
       onClick={onClose}
     >
       <div 
-        className="bg-paper w-full max-w-md border-2 border-ink shadow-paper relative flex flex-col animate-in zoom-in-95"
+        className="bg-paper w-full max-w-md border-2 border-ink shadow-paper relative flex flex-col animate-in zoom-in-95 overflow-hidden"
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
       >
         {/* Header */}
-        <div className="p-4 border-b-2 border-ink flex justify-between items-center bg-highlight">
+        <div className="p-4 border-b-2 border-ink flex justify-between items-center bg-highlight shrink-0">
           <h2 className="text-xl font-serif font-bold text-ink">{title || 'Potwierdzenie'}</h2>
           <button 
             onClick={onClose} 
@@ -43,7 +43,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto">
           {children}
         </div>
       </div>
