@@ -2,6 +2,8 @@
 
 ## Available endpoints
 
+PORT = ```6969```
+
 ### ```/stores-ranking``` [GET]
 - Arguments: 
     - ```province``` - in Poland województwo, if you want a regional ranking. Optional.
