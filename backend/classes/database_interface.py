@@ -64,16 +64,20 @@ class DatabaseInterface:
         return self.find("products", {})
     
     def update_prod_quantity(self, product):
-        collection = self.database["stores"]
+        collection = self.database["products"]
         if product.quantity == 0:
             collection.delete_one({"id": product.id})
         else:
+            from classes.product import Product
+            current_prod = Product.from_database(self.find("products", {"id": product.id})[0], self)
             collection.update_one(
-                {"id": product.id},
-                {"$set": {"quantity": product.quantity}}
+                {"id": current_prod.id},
+                {"$set": {"quantity": current_prod.quantity + product.quantity}}
             )
 
     def add_product(self, product):
+        print(len(self.find("products", {"id" : product.id})))
+        print(self.find("products", {"id" : product.id}))
         if len(self.find("products", {"id" : product.id})) == 0:
             product_dict = product.prepare_dict()
             self.add(product_dict, "products")
