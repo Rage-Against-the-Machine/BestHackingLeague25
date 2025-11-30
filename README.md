@@ -2,6 +2,8 @@
 
 This repository contains the source code for the Gazetka project, which is composed of a backend, a web frontend, and a mobile application.
 
+Full documentation in Polish available [here](./docs/dokumentacja.pdf).
+
 ## Projects
 
 Below is a brief overview of each component of the project. For more detailed information, please refer to the README file within each project's directory.
