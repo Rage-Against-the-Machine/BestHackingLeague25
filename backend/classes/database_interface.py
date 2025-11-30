@@ -45,7 +45,10 @@ class DatabaseInterface:
             return []
     
     def get_user(self, username):
-        user_raw = self.find("users", {"username" : username})[0]
+        users_list = self.find("users", {"username" : username})
+        if len(users_list) == 0:
+            return None
+        user_raw = users_list[0]
         user = User.from_database(user_raw)
         return user
     

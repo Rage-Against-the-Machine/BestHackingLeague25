@@ -86,13 +86,13 @@ resp = send_to_endpoint_product(
 # print(resp.status_code)
 # print(resp.json())
 
-# resp = send_buy_product_request(
-#     "http://localhost:6969/buy-product",
-#     code="roszczyk_20251129235954",
-#     product_id="0_1234567890123_Classic_499",
-#     quantity=5,
-#     store_id=0
-# )
+resp = send_buy_product_request(
+    "http://localhost:6969/buy-product",
+    code="julek_20251130043352",
+    product_id="0_1234567890123_Classic_499",
+    quantity=5,
+    store_id=0
+)
 
 # resp = send_add_user_request(
 #     "http://localhost:6969/add-user",

@@ -184,6 +184,8 @@ def validate_user():
     username = request.args.get('username', default=None, type=str)
     password = request.args.get('password', default=None, type=str)
     user = database.get_user(username)
+    if user == None:
+        return jsonify({"validated?" : "false"})
     if password == user.password:
         return jsonify({"validated?" : "true"})
     else:
@@ -225,7 +227,10 @@ def add_user_endpoint():
 def validate_store():
     name = request.args.get('name', default=None, type=str)
     password = request.args.get('password', default=None, type=str)
-    store_id = database.find("stores", {"name" : name})[0]["id"]
+    found_stores = database.find("stores", {"name" : name})
+    if len(found_stores) == 0:
+        return jsonify({"validated?" : "false"})
+    store_id = found_stores[0]["id"]
     store = database.get_store(store_id)
     if password == store.password:
         return jsonify({
