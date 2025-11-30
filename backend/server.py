@@ -20,7 +20,6 @@ users = get_all_users(database)
 products = get_all_products(database)
 
 app = Flask(__name__)
-CORS(app)
 
 stores_ranking = StoresRanking(stores)
 
@@ -223,7 +222,10 @@ def validate_store():
     store_id = database.find("stores", {"name" : name})[0]["id"]
     store = database.get_store(store_id)
     if password == store.password:
-        return jsonify({"validated?" : "true"})
+        return jsonify({
+            "validated?" : "true",
+            "id" : store.id
+        })
     else:
         return jsonify({"validated?" : "false"})
     

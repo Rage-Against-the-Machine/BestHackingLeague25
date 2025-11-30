@@ -1,9 +1,10 @@
 import requests
 
-def send_to_endpoint_store(url, name, location):
+def send_to_endpoint_store(url, name, location, password):
     payload = {
         "name": name,
-        "location": location
+        "location": location,
+        "password" : password
     }
 
     response = requests.post(url, json=payload)
@@ -66,7 +67,7 @@ def send_add_user_request(url, username, email, password):
     response = requests.post(url, json=payload)
     return response
 
-# send_to_endpoint_store("http://localhost:6969/add-store", "poziomka", (54,69))
+# send_to_endpoint_store("http://localhost:6969/add-store", "poziomka", (54,69), "gunwo")
 
 resp = send_to_endpoint_product(
     "http://localhost:6969/add-product",

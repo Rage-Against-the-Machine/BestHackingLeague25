@@ -117,7 +117,7 @@ PORT = ```6969```
     - ```name``` - store's name
     - ```password``` - password to check if correct
 - Returns
-    - ```{"validated?" : "true"}``` if correct
+    - ```{"validated?" : "true", "id" : <store_id>}``` if correct
     - ```{"validated?" : "false"}``` if not correct
 
 
