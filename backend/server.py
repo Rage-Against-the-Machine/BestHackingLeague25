@@ -174,7 +174,8 @@ def generate_qr():
 def get_user_info():
     username = request.args.get('username', default=None, type=str)
     user = database.get_user(username)
-    user_dict = user.prepare_dict().pop("password")
+    user_dict = user.prepare_dict()
+    user_dict.pop("password")
     return jsonify(user_dict)
 
 
