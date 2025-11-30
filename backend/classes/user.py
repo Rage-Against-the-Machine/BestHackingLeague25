@@ -11,6 +11,7 @@ class User:
 
     @classmethod
     def from_database(cls, doc):
+        print(doc)
         return cls(
             username = doc["username"],
             email = doc["email"],
@@ -40,7 +41,8 @@ class User:
         return dict({
             "username" : self.username,
             "email" : self.email,
-            "points" : self.points
+            "points" : self.points,
+            "password" : self.password
         })
     
 

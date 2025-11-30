@@ -166,7 +166,7 @@ def generate_qr():
 def get_user_info():
     username = request.args.get('username', default=None, type=str)
     user = database.get_user(username)
-    user_dict = user.prepare_dict()
+    user_dict = user.prepare_dict().pop("password")
     return jsonify(user_dict)
 
 
@@ -202,33 +202,16 @@ def add_user_endpoint():
     password = data.get("password")
 
     new_user = User(username, email, password)
-    database.add_user(new_user)
+    new_user = database.add_user(new_user)
     users.append(new_user)
 
-    #WIP
-
-    # return jsonify({
-    #     "status": "ok",
-    #         "username" : id,
-    #         "name": name,
-    #         "location": location.get_coords(),
-    #         "city" : location.get_city()
-    # }), 200
+    return jsonify({
+        "status": "ok",
+        "username" : new_user.username,
+        "email": new_user.email,
+        "points" : new_user.points
+    }), 200
 
 
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
-
-# from classes.qr_codes import QR_code
-# qr_code = QR_code(users[0])
-# database.add_qr_code(qr_code)
-
-# print(database.find("qr_codes", {}))
-
-# user_1 = database.find("users", {"username" : "roszczyk"})[0]
-# user_1 = User.from_database(user_1)
-# print(user_1.get_points())
-
-# user_1 = User("roszczyk", "roszczyk@mock", "dupa")
-# database.add_user(user_1)
-# print(database.get_all_users())

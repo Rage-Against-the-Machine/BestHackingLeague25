@@ -91,3 +91,22 @@ PORT = ```6969```
     - ```keep``` - how many items of the product you want to keep. Optional, default 0.
 - Actions:
     - Deletes product from database
+
+
+### ```/validate-user``` [GET]
+- Arguments:
+    - ```username``` - username
+    - ```password``` - password to check if correct
+- Returns
+    - ```{"validated?" : "true"}``` if correct
+    - ```{"validated?" : "false"}``` if not correct
+
+### ```/add-user```
+- Arguments:
+    - ```username``` - username
+    - ```email``` - user's email address
+    - ```password``` - user's password
+- Returns:
+    - ```username``` - set unique username
+    - ```email``` - user's email address
+    - ```points``` - amount of user's points
