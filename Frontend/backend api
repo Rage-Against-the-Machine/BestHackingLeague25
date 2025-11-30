@@ -19,8 +19,6 @@ ranking of stores in the correct order
 following stores info:
 name (name)
 points (points)
-city (location) (city)
-province (location) (province)
 coords (location) (coords)
 store ID (store_id)
 /add-store [POST]
@@ -35,13 +33,13 @@ list of all products with following products info:
 id (id)
 name (name)
 location - coords (location)
-location - city (city)
 series (series)
 original price (price_original)
 price for registered users (price_users)
 expiration date (exp_date)
 category (category)
 store id (store_id)
+store name (store)
 quantity (quantity)
 photo_url (photo_url)
 /add-product [POST]
@@ -114,3 +112,17 @@ Returns
 {"validated?" : "false"} if not correct
 /all-stores [GET]
 Returns list of stores with the following data: - name (name) - points (points) - location (coords) (location) - store ID (id) - city (city)
+/update-product [POST]
+Overwrites the existing product
+Arguments:
+id - existing product's ID
+name - new product's name
+series - new product's series
+price_original - new original price
+price_users - new price for registered users
+exp_date - new expiration date
+EAN - new EAN code
+category - new product's category
+store_id - new ID of the store registering the product
+quantity - new quantity of the product
+photo_url - new URL to product's image
