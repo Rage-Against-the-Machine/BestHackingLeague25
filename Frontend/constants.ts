@@ -1,3 +1,4 @@
+export const API_URL = 'http://100.82.90.77:6969';
 
 import { Product, ProductCategory } from './types';
 
