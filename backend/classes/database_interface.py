@@ -118,7 +118,10 @@ class DatabaseInterface:
         
     def get_product(self, product_id):
         from classes.product import Product
-        raw_product = self.find("products", {"id" : product_id})[0]
+        products_list = self.find("products", {"id" : product_id})
+        if len(products_list) == 0:
+            return None
+        raw_product = products_list[0]
         product = Product.from_database(raw_product, self)
         return product
 

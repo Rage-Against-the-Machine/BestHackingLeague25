@@ -25,6 +25,7 @@ users = get_all_users(database)
 products = get_all_products(database)
 
 app = Flask(__name__)
+CORS(app)
 
 stores_ranking = StoresRanking(stores)
 
@@ -161,6 +162,10 @@ def buy_product():
 def generate_qr():
     username = request.args.get('username', default=None, type=str)
     user = database.get_user(username)
+    if user == None:
+        return jsonify({
+            "error" : "user_not_existing"
+        })
     qr_code = QR_code(user)
     database.add_qr_code(qr_code)
 
@@ -174,6 +179,10 @@ def generate_qr():
 def get_user_info():
     username = request.args.get('username', default=None, type=str)
     user = database.get_user(username)
+    if user == None:
+        return jsonify({
+            "error" : "user_not_existing"
+        })
     user_dict = user.prepare_dict()
     user_dict.pop("password")
     return jsonify(user_dict)
@@ -199,6 +208,8 @@ def delete_product():
     product_id = request.args.get('product_id', type=str)
     keep_quantity = request.args.get('keep', default=0, type=int)
     product_db = database.get_product(product_id)
+    if product_db == None:
+        return jsonify({"error" : "product not existing"})
     product_db.quantity = keep_quantity
     database.update_prod_quantity(product_db, addition=False)
     products = get_all_products(database)
@@ -269,7 +280,6 @@ def update_product():
     store = database.get_store(store_id)
     new_product = Product(name, series, price_original, price_users, exp_date, EAN, 
                         category, store, quantity, photo_url, prod_id)
-    
     database.delete("products", {"id" : prod_id})
     database.add_product(new_product)
     products = get_all_products(database)
