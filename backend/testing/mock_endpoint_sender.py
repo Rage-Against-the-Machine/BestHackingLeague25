@@ -66,21 +66,21 @@ def send_add_user_request(url, username, email, password):
     response = requests.post(url, json=payload)
     return response
 
-send_to_endpoint_store("http://localhost:6969/add-store", "poziomka", (54,69))
+# send_to_endpoint_store("http://localhost:6969/add-store", "poziomka", (54,69))
 
-# resp = send_to_endpoint_product(
-#     "http://localhost:6969/add-product",
-#     name="Coca Cola",
-#     series="Classic",
-#     price_original=5.99,
-#     price_users=4.99,
-#     exp_date="2025-12-01",
-#     EAN="1234567890123",
-#     category="Drinks",
-#     store_id=0,
-#     quantity=10,
-#     photo_url="https://example.com/photo.jpg"
-# )
+resp = send_to_endpoint_product(
+    "http://localhost:6969/add-product",
+    name="Pepsi",
+    series="Classic",
+    price_original=5.99,
+    price_users=4.99,
+    exp_date="2025-12-01",
+    EAN="1234567890123",
+    category="Drinks",
+    store_id=0,
+    quantity=10,
+    photo_url="https://example.com/photo.jpg"
+)
 
 # print(resp.status_code)
 # print(resp.json())

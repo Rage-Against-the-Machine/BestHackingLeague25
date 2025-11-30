@@ -226,5 +226,15 @@ def validate_store():
         return jsonify({"validated?" : "true"})
     else:
         return jsonify({"validated?" : "false"})
+    
+@app.route('/all-stores', methods=["GET"])
+def get_all_stores_endpoint():
+    stores_data = []
+    stores_to_pull = get_all_stores(database)
+    for s in stores_to_pull:
+        without_pass = s.prepare_dict()
+        without_pass.pop("password")
+        stores_data.append(without_pass)
+    return jsonify(stores_data)
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)

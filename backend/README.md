@@ -119,3 +119,12 @@ PORT = ```6969```
 - Returns
     - ```{"validated?" : "true"}``` if correct
     - ```{"validated?" : "false"}``` if not correct
+
+
+### ```/all-stores``` [GET]
+- Returns list of stores with the following data:
+        - name (```name```)
+        - points (```points```)
+        - location (coords) (```location```)
+        - store ID (```id```)
+        - city (```city```)
