@@ -8,4 +8,12 @@ class MapLocation {
     required this.lng,
     required this.label,
   });
+
+  factory MapLocation.from(Map<String, dynamic> json) {
+    return MapLocation(
+      lat: json['lat'],
+      lng: json['lng'],
+      label: json['label'] ?? '',
+    );
+  }
 }

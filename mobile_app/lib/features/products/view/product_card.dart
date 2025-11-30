@@ -5,11 +5,17 @@ import 'package:mobile_app/features/products/model/product.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-  const ProductCard({super.key, required this.product});
+  final int discountPercent;
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.discountPercent,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       color: AppColors.productBackground,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -26,6 +32,39 @@ class ProductCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.accent,
               borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: (product.photoUrl).isNotEmpty
+                  ? Image.network(
+                      product.photoUrl,
+                      fit: BoxFit.cover,
+                      width: 100,
+                      height: 100,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: AppColors.accent,
+                          child: Icon(
+                            Icons.broken_image,
+                            color: AppColors.textSecondary,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      color: AppColors.accent,
+                      child: Icon(Icons.image, color: AppColors.textSecondary),
+                    ),
             ),
           ),
           Padding(
@@ -54,7 +93,10 @@ class ProductCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                         SizedBox(width: 4),
-                        Text(product.storeId, style: AppTypography.caption),
+                        Text(
+                          product.quantity.toString(),
+                          style: AppTypography.caption,
+                        ),
                       ],
                     ),
                     Row(
@@ -65,10 +107,7 @@ class ProductCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                         SizedBox(width: 4),
-                        Text(
-                          product.location['city'] ?? 'Dupczewo',
-                          style: AppTypography.caption,
-                        ),
+                        Text(product.store, style: AppTypography.caption),
                       ],
                     ),
                     Row(
@@ -95,7 +134,10 @@ class ProductCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text('45.00 PLN', style: AppTypography.discountedPrice),
+                    Text(
+                      '${product.priceOriginal} PLN',
+                      style: AppTypography.discountedPrice,
+                    ),
                     SizedBox(width: 8),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -103,11 +145,14 @@ class ProductCard extends StatelessWidget {
                         color: AppColors.discountBadgeBackground,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text('-22%', style: AppTypography.discountPercent),
+                      child: Text(
+                        '-$discountPercent%',
+                        style: AppTypography.discountPercent,
+                      ),
                     ),
                   ],
                 ),
-                Text('35.00 PLN', style: AppTypography.price),
+                Text('${product.priceUsers} PLN', style: AppTypography.price),
               ],
             ),
           ),

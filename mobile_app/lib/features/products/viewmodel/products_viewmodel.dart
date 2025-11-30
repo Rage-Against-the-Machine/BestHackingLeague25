@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mobile_app/features/products/model/product.dart';
 
 class ProductsViewmodel extends ChangeNotifier {
-  final String _baseUrl = 'http://localhost:6969/products';
+  final String _baseUrl = 'http://100.82.90.77:6969/products';
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -21,6 +21,16 @@ class ProductsViewmodel extends ChangeNotifier {
     }
   }
 
+  int getDiscountPercentage(double originalPrice, double discountedPrice) {
+    if (originalPrice <= 0 || discountedPrice > originalPrice) {
+      return 0;
+    }
+    double discountFraction = (originalPrice - discountedPrice) / originalPrice;
+    int discountPercent = (discountFraction * 100).round();
+
+    return discountPercent;
+  }
+
   Future<void> fetchProducts() async {
     if (_isLoading) return;
 
@@ -32,11 +42,13 @@ class ProductsViewmodel extends ChangeNotifier {
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = jsonDecode(
-          utf8.decode(response.bodyBytes),
-        );
-
-        _products = jsonList.map((json) => Product.fromJson(json)).toList();
+        final List<dynamic> data = json.decode(response.body);
+        final List<Product> fetchedProducts = data
+            .map((item) => Product.fromJson(item))
+            .toList();
+        print(fetchedProducts[0].name);
+        _products = fetchedProducts;
+        notifyListeners();
       } else {
         throw Exception(
           'Failed to load products. Status code: ${response.statusCode}',
