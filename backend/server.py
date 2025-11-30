@@ -15,9 +15,9 @@ DB_URL = "mongodb://user:password@localhost:27017/"
 
 database = DatabaseInterface(DB_URL, "gazetka_main")
 
+stores = get_all_stores(database)
 users = get_all_users(database)
 products = get_all_products(database)
-stores = get_all_stores(database)
 
 app = Flask(__name__)
 CORS(app)
@@ -48,12 +48,13 @@ def add_store():
     data = request.get_json()
     name = data.get("name")
     location_raw = data.get("location")
+    password = data.get("password")
 
     location = Location(location_raw[0], location_raw[1])
 
     id = store_id_available()
 
-    new_store = Store(id, name, location)
+    new_store = Store(id, name, location, password)
     database.add_store(new_store)
     stores.append(new_store)
     stores_ranking.add_store(new_store)
@@ -212,6 +213,15 @@ def add_user_endpoint():
         "points" : new_user.points
     }), 200
 
-
+@app.route('/validate-store', methods=["GET"])
+def validate_store():
+    name = request.args.get('name', default=None, type=str)
+    password = request.args.get('password', default=None, type=str)
+    store_id = database.find("stores", {"name" : name})[0]["id"]
+    store = database.get_store(store_id)
+    if password == store.password:
+        return jsonify({"validated?" : "true"})
+    else:
+        return jsonify({"validated?" : "false"})
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)

@@ -54,6 +54,18 @@ def send_buy_product_request(url, code, product_id, quantity, store_id):
     response = requests.post(url, json=payload)
     return response
 
+def send_add_user_request(url, username, email, password):
+    payload = {
+        "username": username,
+        "password": password,
+        "email": email
+    }
+
+    print(payload)
+
+    response = requests.post(url, json=payload)
+    return response
+
 # send_to_endpoint_store("http://localhost:6969/add-store", "truskawka", (54,69))
 
 # resp = send_to_endpoint_product(
@@ -73,12 +85,19 @@ def send_buy_product_request(url, code, product_id, quantity, store_id):
 # print(resp.status_code)
 # print(resp.json())
 
-resp = send_buy_product_request(
-    "http://localhost:6969/buy-product",
-    code="roszczyk_20251129235954",
-    product_id="0_1234567890123_Classic_499",
-    quantity=5,
-    store_id=0
+# resp = send_buy_product_request(
+#     "http://localhost:6969/buy-product",
+#     code="roszczyk_20251129235954",
+#     product_id="0_1234567890123_Classic_499",
+#     quantity=5,
+#     store_id=0
+# )
+
+resp = send_add_user_request(
+    "http://localhost:6969/add-user",
+    username="julek",
+    email = "julek@mock",
+    password = "gowno"
 )
 
 print(resp.status_code)

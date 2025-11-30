@@ -1,11 +1,12 @@
 from classes.utils import Location, merge_sort_ranking
 
 class Store:
-    def __init__(self, id, name : str, location : Location, points = 0):
+    def __init__(self, id, name : str, location : Location, password, points = 0):
         self.id = id
         self.name = name
         self.location = location
         self.points = points
+        self.password = password
 
     @classmethod
     def from_database(cls, doc):
@@ -13,6 +14,7 @@ class Store:
             id = doc["id"],
             name = doc["name"],
             location = Location(doc["location"][0], doc["location"][1]),
+            password = doc["password"],
             points = doc["points"]
         )
 
@@ -22,7 +24,8 @@ class Store:
             "name" : self.name,
             "location" : self.location.get_coords(),
             "city" : self.location.get_city(),
-            "points" : self.points
+            "points" : self.points,
+            "password" : self.password
         })
     
     def add_points(self, points : int):

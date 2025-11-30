@@ -101,7 +101,7 @@ PORT = ```6969```
     - ```{"validated?" : "true"}``` if correct
     - ```{"validated?" : "false"}``` if not correct
 
-### ```/add-user```
+### ```/add-user``` [POST]
 - Arguments:
     - ```username``` - username
     - ```email``` - user's email address
@@ -110,3 +110,12 @@ PORT = ```6969```
     - ```username``` - set unique username
     - ```email``` - user's email address
     - ```points``` - amount of user's points
+
+
+### ```/validate-store``` [GET]
+- Arguments:
+    - ```name``` - store's name
+    - ```password``` - password to check if correct
+- Returns
+    - ```{"validated?" : "true"}``` if correct
+    - ```{"validated?" : "false"}``` if not correct
