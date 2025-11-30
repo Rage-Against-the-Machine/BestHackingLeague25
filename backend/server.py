@@ -35,11 +35,12 @@ def store_id_available():
 
 @app.route('/stores-ranking', methods=['GET'])
 def get_stores_ranking():
+    global stores_ranking
     province = request.args.get('province', default=None, type=str)
-    stores = get_all_stores(database)
     if province == None:
         results = stores_ranking.get_ranking_list()
     else:
+        global stores
         province_ranking = StoresRanking(stores, province)
         results = province_ranking.get_ranking_list()
     return jsonify(results)
@@ -79,7 +80,6 @@ from datetime import datetime
 @app.route('/products', methods=['GET'])
 def get_products():
     output_list = database.get_products_dicts()
-    print(output_list)
     return jsonify(output_list)
 
 
@@ -247,6 +247,7 @@ def validate_store():
 def get_all_stores_endpoint():
     stores_data = []
     stores_to_pull = get_all_stores(database)
+    database.get_all_stores()
     for s in stores_to_pull:
         without_pass = s.prepare_dict()
         without_pass.pop("password")

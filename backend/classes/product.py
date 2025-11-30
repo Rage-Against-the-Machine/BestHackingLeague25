@@ -42,7 +42,6 @@ class Product:
             "id" : self.id,
             "name" : self.name,
             "location" : self.get_location_coords(),
-            "city" : self.get_city(),
             "series": self.series,
             "price_original": self.price_original,
             "price_users": self.price_users,

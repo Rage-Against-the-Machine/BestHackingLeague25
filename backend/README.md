@@ -12,8 +12,6 @@ PORT = ```6969```
     - following stores info:
         - name (```name```)
         - points (```points```)
-        - city (location) (```city```)
-        - province (location) (```province```)
         - coords (location) (```coords```)
         - store ID (```store_id```)
 
@@ -30,7 +28,6 @@ PORT = ```6969```
         - id (```id```)
         - name (```name```)
         - location - coords (```location```)
-        - location - city (```city```)
         - series (```series```)
         - original price (```price_original```)
         - price for registered users (```price_users```)
@@ -134,13 +131,13 @@ PORT = ```6969```
 - Overwrites the existing product
 - Arguments:
     - ```id``` - existing product's ID
-    - ```name``` - product's name
-    - ```series``` - product's series
-    - ```price_original``` - original price
-    - ```price_users``` - price for registered users
-    - ```exp_date``` - expiration date
-    - ```EAN``` - EAN code
-    - ```category``` - product's category
-    - ```store_id``` - ID of the store registering the product
-    - ```quantity``` - quantity of the product
-    - ```photo_url``` - URL to product's image
+    - ```name``` - new product's name
+    - ```series``` - new product's series
+    - ```price_original``` - new original price
+    - ```price_users``` - new price for registered users
+    - ```exp_date``` - new expiration date
+    - ```EAN``` - new EAN code
+    - ```category``` - new product's category
+    - ```store_id``` - new ID of the store registering the product
+    - ```quantity``` - new quantity of the product
+    - ```photo_url``` - new URL to product's image

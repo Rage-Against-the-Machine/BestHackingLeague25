@@ -47,13 +47,13 @@ class StoresRanking:
             for u in stores:
                 if u.get_location().get_province() == province:
                     self.stores.append(u)
-        self.current_ranking = self.update_ranking()
+        self.current_ranking = None
+        self.update_ranking()
 
     def update_ranking(self):
         self.current_ranking = merge_sort_ranking(self.stores)
     
     def get_ranking_list(self):
-        self.update_ranking()
         i = 1
         result = []
         for record in self.current_ranking:
@@ -61,8 +61,6 @@ class StoresRanking:
                 "place" : i, 
                 "name" : record.name,
                 "points" : record.get_points(),
-                "city" : record.get_location().get_city(),
-                "province" : record.get_location().get_province(),
                 "coords" : record.get_location().get_coords(),
                 "store_id" : record.id
             })
