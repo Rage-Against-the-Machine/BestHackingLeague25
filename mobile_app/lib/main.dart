@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/core/theme/app_colors.dart';
 import 'package:mobile_app/core/theme/app_theme.dart';
 import 'package:mobile_app/features/map/view/map_page.dart';
+import 'package:mobile_app/features/map/viewModel/map_viewmodel.dart';
 import 'package:mobile_app/features/products/view/products_page.dart';
 import 'package:mobile_app/features/products/viewmodel/products_viewmodel.dart';
 import 'package:mobile_app/features/profile/view/user_page.dart';
@@ -10,8 +11,16 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ProductsViewmodel(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ProductsViewmodel()),
+
+        ChangeNotifierProvider(
+          create: (context) => MapViewModel(
+            productsViewModel: context.read<ProductsViewmodel>(),
+          ),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
