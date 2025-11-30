@@ -194,6 +194,29 @@ def delete_product():
     return jsonify({"done" : "ok"})
 
 
+@app.post('/add-user')
+def add_user_endpoint():
+    data = request.get_json()
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+
+    new_user = User(username, email, password)
+    database.add_user(new_user)
+    users.append(new_user)
+
+    #WIP
+
+    # return jsonify({
+    #     "status": "ok",
+    #         "username" : id,
+    #         "name": name,
+    #         "location": location.get_coords(),
+    #         "city" : location.get_city()
+    # }), 200
+
+
+
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
 
 # from classes.qr_codes import QR_code

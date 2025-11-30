@@ -3,11 +3,11 @@ from classes.utils import Location, merge_sort_ranking
 from datetime import datetime
 
 class User:
-    def __init__(self, username : str, email : str, password : str, points = None):
+    def __init__(self, username : str, email : str, password : str, points = 0):
         self.username = username
         self.email = email
         self.password = password
-        self.points = 0 if points == None else points
+        self.points = points
 
     @classmethod
     def from_database(cls, doc):
