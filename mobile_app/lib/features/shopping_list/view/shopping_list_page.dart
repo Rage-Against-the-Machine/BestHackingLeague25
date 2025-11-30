@@ -7,7 +7,6 @@ import 'package:share_plus/share_plus.dart';
 
 class ShoppingListPage extends StatelessWidget {
   const ShoppingListPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,15 +45,12 @@ class ShoppingListPage extends StatelessWidget {
                       ),
                     );
                   }
-
                   final groupedList = viewModel.groupedShoppingList;
-
                   return ListView.builder(
                     itemCount: groupedList.length,
                     itemBuilder: (context, index) {
                       final storeName = groupedList.keys.elementAt(index);
                       final items = groupedList[storeName]!;
-
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -87,19 +83,23 @@ class ShoppingListPage extends StatelessWidget {
                                         width: 60,
                                         height: 60,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            Container(
-                                              width: 60,
-                                              height: 60,
-                                              color: Colors.grey[300],
-                                              child: const Icon(Icons.error),
-                                            ),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Container(
+                                                  width: 60,
+                                                  height: 60,
+                                                  color: Colors.grey[300],
+                                                  child: const Icon(
+                                                    Icons.error,
+                                                  ),
+                                                ),
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             product.name,
@@ -114,7 +114,8 @@ class ShoppingListPage extends StatelessWidget {
                                             children: [
                                               Text(
                                                 '${product.priceOriginal.toStringAsFixed(2)} PLN',
-                                                style: AppTypography.discountedPrice,
+                                                style: AppTypography
+                                                    .discountedPrice,
                                               ),
                                               Text(
                                                 '${product.priceUsers.toStringAsFixed(2)} PLN',
@@ -133,7 +134,9 @@ class ShoppingListPage extends StatelessWidget {
                                           ),
                                           color: AppColors.textSecondary,
                                           onPressed: () {
-                                            viewModel.decrementQuantity(product);
+                                            viewModel.decrementQuantity(
+                                              product,
+                                            );
                                           },
                                         ),
                                         Text(
@@ -143,11 +146,15 @@ class ShoppingListPage extends StatelessWidget {
                                           ),
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.add_circle_outline),
-                                          color: item.quantity >= product.quantity
+                                          icon: const Icon(
+                                            Icons.add_circle_outline,
+                                          ),
+                                          color:
+                                              item.quantity >= product.quantity
                                               ? Colors.grey
                                               : AppColors.accent,
-                                          onPressed: item.quantity >= product.quantity
+                                          onPressed:
+                                              item.quantity >= product.quantity
                                               ? null
                                               : () {
                                                   viewModel.incrementQuantity(

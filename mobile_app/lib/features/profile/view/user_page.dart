@@ -7,7 +7,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
-
   @override
   State<UserPage> createState() => _UserPageState();
 }
@@ -15,10 +14,8 @@ class UserPage extends StatefulWidget {
 class _UserPageState extends State<UserPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   bool _isLoggingIn = false;
   bool _isLoggingOut = false;
-
   @override
   void dispose() {
     _usernameController.dispose();
@@ -30,17 +27,14 @@ class _UserPageState extends State<UserPage> {
     setState(() {
       _isLoggingIn = true;
     });
-
     final String username = _usernameController.text.trim();
     final String password = _passwordController.text;
-
     try {
       final userViewModel = context.read<UserViewModel>();
       final bool validated = await userViewModel.validateLogin(
         username: username,
         password: password,
       );
-
       if (validated) {
         await userViewModel.fetchUser(username: username);
       } else {
@@ -72,12 +66,10 @@ class _UserPageState extends State<UserPage> {
     setState(() {
       _isLoggingOut = true;
     });
-
     try {
       await context.read<UserViewModel>().logout();
       _usernameController.clear();
       _passwordController.clear();
-
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -221,7 +213,6 @@ class _UserPageState extends State<UserPage> {
         if (userViewModel.user == null) {
           return _buildLoginView();
         }
-
         return Scaffold(
           backgroundColor: AppColors.background,
           body: SafeArea(
@@ -233,7 +224,6 @@ class _UserPageState extends State<UserPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -272,17 +262,11 @@ class _UserPageState extends State<UserPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 32),
-
-                  // Savings Card
                   SavedMoneyWidget(
                     totalSavings: userViewModel.points.toDouble(),
                   ),
-
                   const SizedBox(height: 32),
-
-                  // Membership Card (QR)
                   Center(
                     child: Container(
                       width: double.infinity,
@@ -334,7 +318,6 @@ class _UserPageState extends State<UserPage> {
                               eyeShape: QrEyeShape.square,
                             ),
                           ),
-
                           const SizedBox(height: 8),
                           Text(
                             'Zeskanuj przy kasie',
@@ -346,7 +329,6 @@ class _UserPageState extends State<UserPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 32),
                 ],
               ),
@@ -360,14 +342,11 @@ class _UserPageState extends State<UserPage> {
 
 class SavedMoneyWidget extends StatelessWidget {
   final double totalSavings;
-
   const SavedMoneyWidget({required this.totalSavings, super.key});
-
   @override
   Widget build(BuildContext context) {
     final String formattedSavings =
         '${(totalSavings / 100).toStringAsFixed(2)} PLN';
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),

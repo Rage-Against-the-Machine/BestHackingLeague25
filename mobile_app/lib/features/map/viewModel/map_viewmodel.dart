@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:mobile_app/features/navigation/viewmodel/navigation_viewmodel.dart';
 import 'package:mobile_app/features/products/viewmodel/products_viewmodel.dart';
 import 'package:mobile_app/features/profile/viewModel/user_viewmodel.dart';
@@ -15,7 +14,6 @@ class MarkerData {
   final String productName;
   final String productId;
   final bool isInRange;
-
   const MarkerData({
     required this.position,
     required this.label,
@@ -27,19 +25,14 @@ class MarkerData {
 
 class MapViewModel extends ChangeNotifier {
   final ProductsViewmodel productsViewModel;
-
   UserViewModel? _userViewModel;
-
   LatLng? get userLocation => _userViewModel?.userLocation;
   bool get isLocating => _userViewModel?.isLocating ?? false;
   double get maxDistanceKm => _userViewModel?.maxDistanceKm ?? 10.0;
-
   MapViewModel({required this.productsViewModel}) {
     productsViewModel.addListener(_onProductsUpdated);
   }
-
   Function(LatLng, double)? _onMoveMap;
-
   void setMoveMapCallback(Function(LatLng, double) callback) {
     _onMoveMap = callback;
   }
@@ -57,10 +50,7 @@ class MapViewModel extends ChangeNotifier {
   void update(UserViewModel userViewModel) {
     final oldLocation = _userViewModel?.userLocation;
     _userViewModel = userViewModel;
-
-    // Trigger zoom if location wasn't available before but is now
     if (oldLocation == null && userViewModel.userLocation != null) {
-      // Small delay to ensure map is ready if this happens during init
       Future.delayed(const Duration(milliseconds: 500), () {
         moveToUserLocation();
       });
@@ -78,36 +68,31 @@ class MapViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   List<MarkerData> get markerData {
     final userLoc = _userViewModel?.userLocation;
     final maxDist = maxDistanceKm;
     final Distance distanceCalculator = const Distance();
-
-    return productsViewModel.allProducts
-        .map((p) {
-          bool inRange = false;
-          if (userLoc != null) {
-            final productLoc = LatLng(p.location[0], p.location[1]);
-            final distMeters = distanceCalculator.as(LengthUnit.Meter, userLoc, productLoc);
-            inRange = distMeters <= (maxDist * 1000);
-          } else {
-            // If no user location, show everything as out of range or handle differently?
-            // For now let's assume out of range if no location, or maybe in range?
-            // If we don't know where user is, we can't really say it's "in range" of the circle.
-            inRange = false; 
-          }
-
-          return MarkerData(
-            position: LatLng(p.location[0], p.location[1]),
-            label: p.store,
-            productName: p.name,
-            productId: p.id,
-            isInRange: inRange,
-          );
-        })
-        .toList();
+    return productsViewModel.allProducts.map((p) {
+      bool inRange = false;
+      if (userLoc != null) {
+        final productLoc = LatLng(p.location[0], p.location[1]);
+        final distMeters = distanceCalculator.as(
+          LengthUnit.Meter,
+          userLoc,
+          productLoc,
+        );
+        inRange = distMeters <= (maxDist * 1000);
+      } else {
+        inRange = false;
+      }
+      return MarkerData(
+        position: LatLng(p.location[0], p.location[1]),
+        label: p.store,
+        productName: p.name,
+        productId: p.id,
+        isInRange: inRange,
+      );
+    }).toList();
   }
 
   List<Marker> getAllMarkers(BuildContext context) {
@@ -115,7 +100,6 @@ class MapViewModel extends ChangeNotifier {
     markers.addAll(
       markerData.map((marker) {
         if (!marker.isInRange) {
-          // Render simple dot for out-of-range stores
           return Marker(
             width: 12.0,
             height: 12.0,
@@ -136,17 +120,13 @@ class MapViewModel extends ChangeNotifier {
             ),
           );
         }
-
-        // Render full marker for in-range stores
         return Marker(
           width: 140.0,
           height: 80.0,
           point: marker.position,
           child: GestureDetector(
             onTap: () {
-              // 1. Filter products by store
               context.read<ProductsViewmodel>().filterByStore(marker.label);
-              // 2. Navigate to Products tab
               context.read<NavigationViewModel>().setIndex(0);
             },
             child: Column(
@@ -171,7 +151,6 @@ class MapViewModel extends ChangeNotifier {
                   ),
                 ),
                 const SizedBox(height: 6.0),
-
                 Container(
                   width: 12.0,
                   height: 12.0,
@@ -193,7 +172,6 @@ class MapViewModel extends ChangeNotifier {
         );
       }),
     );
-
     if (userLocation != null) {
       markers.add(
         Marker(
@@ -204,7 +182,6 @@ class MapViewModel extends ChangeNotifier {
         ),
       );
     }
-
     return markers;
   }
 

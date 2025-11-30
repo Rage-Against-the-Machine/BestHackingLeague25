@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/theme/app_colors.dart';
 import 'package:mobile_app/core/theme/app_typography.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:mobile_app/features/products/view/product_card.dart';
+import 'package:mobile_app/features/products/view/product_card_skeleton.dart';
 import 'package:mobile_app/features/products/viewmodel/products_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class ProductsPage extends StatelessWidget {
   const ProductsPage({super.key});
-
   Widget _buildMessageContainer({
     required String message,
     required BuildContext context,
@@ -49,7 +50,6 @@ class ProductsPage extends StatelessWidget {
               ),
               child: Text('GAZETKA', style: AppTypography.headline),
             ),
-            // Category Chips
             Consumer<ProductsViewmodel>(
               builder: (context, viewModel, child) {
                 return SizedBox(
@@ -60,8 +60,7 @@ class ProductsPage extends StatelessWidget {
                     itemCount: viewModel.categories.length,
                     itemBuilder: (context, index) {
                       final category = viewModel.categories[index];
-                      final isSelected =
-                          viewModel.selectedCategory == category;
+                      final isSelected = viewModel.selectedCategory == category;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: ChoiceChip(
@@ -127,9 +126,14 @@ class ProductsPage extends StatelessWidget {
               child: Consumer<ProductsViewmodel>(
                 builder: (context, viewModel, child) {
                   if (viewModel.isLoading && viewModel.productsList.isEmpty) {
-                    return const Center(child: CircularProgressIndicator());
+                    return ListView.builder(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      itemCount: 6, // Show 6 skeletons
+                      itemBuilder: (context, index) {
+                        return const ProductCardSkeleton();
+                      },
+                    );
                   }
-
                   if (viewModel.productsList.isEmpty &&
                       viewModel.hasTimeoutError) {
                     return RefreshIndicator(
@@ -146,7 +150,6 @@ class ProductsPage extends StatelessWidget {
                       ),
                     );
                   }
-
                   if (viewModel.productsList.isEmpty) {
                     return RefreshIndicator(
                       onRefresh: viewModel.fetchProducts,
@@ -161,24 +164,34 @@ class ProductsPage extends StatelessWidget {
                       ),
                     );
                   }
-
                   return RefreshIndicator(
                     onRefresh: viewModel.fetchProducts,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      itemCount: viewModel.productsList.length,
-                      itemBuilder: (context, index) {
-                        final product = viewModel.productsList[index];
-                        final discountPercent = viewModel.getDiscountPercentage(
-                          product.priceOriginal,
-                          product.priceUsers,
-                        );
-
-                        return ProductCard(
-                          product: product,
-                          discountPercent: discountPercent,
-                        );
-                      },
+                    child: AnimationLimiter(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        itemCount: viewModel.productsList.length,
+                        itemBuilder: (context, index) {
+                          final product = viewModel.productsList[index];
+                          final discountPercent =
+                              viewModel.getDiscountPercentage(
+                                product.priceOriginal,
+                                product.priceUsers,
+                              );
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(
+                                child: ProductCard(
+                                  product: product,
+                                  discountPercent: discountPercent,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   );
                 },
