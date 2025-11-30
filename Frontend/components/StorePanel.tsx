@@ -97,7 +97,6 @@ const StorePanel: React.FC<StorePanelProps> = ({ storeName, products, onAddProdu
         onClose={() => setFormModalOpen(false)}
         onSubmit={handleFormSubmit}
         editingProduct={editingProduct}
-        storeName={storeName}
       />
       <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 pt-4 pb-12">
         

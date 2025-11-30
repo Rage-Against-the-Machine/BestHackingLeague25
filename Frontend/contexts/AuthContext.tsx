@@ -10,7 +10,7 @@ interface AuthContextType {
     userRole: UserRole;
     userName: string;
     isLoading: boolean;
-    login: (email: string, password: string) => Promise<UserProfile>;
+    login: (username: string, password: string, role: 'CLIENT' | 'STORE') => Promise<UserProfile>;
     register: (email: string, password: string, name: string, role: 'CLIENT' | 'STORE', location?: string) => Promise<UserProfile>;
     logout: () => void;
 }
@@ -24,10 +24,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const userRole: UserRole = user?.role || 'GUEST';
     const userName = user?.name || '';
 
-    const login = async (email: string, password: string) => {
+    const login = async (username: string, password: string, role: 'CLIENT' | 'STORE') => {
         setIsLoading(true);
         try {
-            const loggedInUser = await userService.login(email, password);
+            const loggedInUser = await userService.login(username, password, role);
             setUser(loggedInUser);
             return loggedInUser;
         } catch(e) {

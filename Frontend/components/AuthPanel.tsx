@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { User, Store, ArrowRight, Lock, Mail, MapPin, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 type AuthMode = 'LOGIN' | 'REGISTER';
 type Role = 'CLIENT' | 'STORE';
 
-const AuthPanel: React.FC = () => {
+export const AuthPanel: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('LOGIN');
   const [role, setRole] = useState<Role>('CLIENT');
   const [error, setError] = useState<string | null>(null);
@@ -14,10 +15,11 @@ const AuthPanel: React.FC = () => {
   const { login, register, isLoading } = useAuth();
 
   // Form States
-  const [email, setEmail] = useState('');
+  const [usernameOrName, setUsernameOrName] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState(''); // User name or Store name
-  const [location, setLocation] = useState(''); // Store location
+  const [latitude, setLatitude] = useState(''); // Store latitude
+  const [longitude, setLongitude] = useState(''); // Store longitude
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,27 +27,20 @@ const AuthPanel: React.FC = () => {
 
     try {
       if (mode === 'LOGIN') {
-        await login(email, password);
+        await login(usernameOrName, password, role); // email is now treated as username for login
       } else {
-        await register(email, password, name, role, location);
+        if (role === 'STORE') {
+          await register(name, password, role, `${latitude},${longitude}`);
+        } else {
+          await register(name, password, role, undefined, email); // Pass email for client registration
+        }
       }
     } catch (err: any) {
       setError(err.message || "Wystąpił błąd autoryzacji.");
     }
   };
 
-  const handleDemoLogin = async (demoRole: Role) => {
-    setError(null);
-    try {
-      if (demoRole === 'CLIENT') {
-        await login('jan@zerowaste.pl', 'user123');
-      } else {
-        await login('sklep@zerowaste.pl', 'store123');
-      }
-    } catch (err: any) {
-        setError("Błąd logowania demo: " + err.message);
-    }
-  };
+
 
   return (
     <div className="max-w-md mx-auto mt-8 animate-in slide-in-from-bottom-8 duration-500">
@@ -66,7 +61,7 @@ const AuthPanel: React.FC = () => {
             <p className="text-ink-light text-sm italic">
               {mode === 'LOGIN' 
                 ? 'Zaloguj się, aby ratować żywność.' 
-                : 'Utwórz konto i zacznij działać Zero Waste.'}
+                : 'Utwórz konto i zacznij działać z Gazetką.'}
             </p>
           </div>
 
@@ -96,6 +91,26 @@ const AuthPanel: React.FC = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Role Selection (Visible for Login) */}
+            {mode === 'LOGIN' && (
+                <div className="grid grid-cols-2 gap-4 mb-6 animate-in fade-in">
+                <div 
+                    onClick={() => setRole('CLIENT')}
+                    className={`cursor-pointer border-2 p-4 flex flex-col items-center justify-center transition-all ${role === 'CLIENT' ? 'border-accent bg-white shadow-paper-sm -translate-y-1' : 'border-ink/20 text-ink-light hover:border-ink'}`}
+                >
+                    <User size={32} className={`mb-2 ${role === 'CLIENT' ? 'text-accent' : 'text-ink-light'}`} />
+                    <span className={`text-xs font-bold uppercase ${role === 'CLIENT' ? 'text-accent' : ''}`}>Klient</span>
+                </div>
+                <div 
+                    onClick={() => setRole('STORE')}
+                    className={`cursor-pointer border-2 p-4 flex flex-col items-center justify-center transition-all ${role === 'STORE' ? 'border-accent bg-white shadow-paper-sm -translate-y-1' : 'border-ink/20 text-ink-light hover:border-ink'}`}
+                >
+                    <Store size={32} className={`mb-2 ${role === 'STORE' ? 'text-accent' : 'text-ink-light'}`} />
+                    <span className={`text-xs font-bold uppercase ${role === 'STORE' ? 'text-accent' : ''}`}>Sklep</span>
+                </div>
+                </div>
+            )}
             
             {/* Role Selection (Visible for Register) */}
             {mode === 'REGISTER' && (
@@ -124,7 +139,7 @@ const AuthPanel: React.FC = () => {
                   <div className="absolute left-3 top-3 text-ink-light"><User size={20} /></div>
                   <input 
                     type="text" 
-                    placeholder={role === 'CLIENT' ? "Imię i Nazwisko" : "Nazwa Sklepu"}
+                    placeholder={role === 'CLIENT' ? "Nazwa Użytkownika" : "Nazwa Sklepu"}
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -132,33 +147,52 @@ const AuthPanel: React.FC = () => {
                   />
                 </div>
                 {role === 'STORE' && (
+                   <>
                    <div className="relative mb-4">
                     <div className="absolute left-3 top-3 text-ink-light"><MapPin size={20} /></div>
                     <input 
-                      type="text" 
-                      placeholder="Adres Sklepu"
+                      type="number" 
+                      placeholder="Szerokość geograficzna (np. 52.2)"
                       required
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
                       className="w-full bg-white border border-ink p-3 pl-10 focus:outline-none focus:ring-2 focus:ring-accent font-sans"
                     />
                   </div>
+                  <div className="relative mb-4">
+                    <div className="absolute left-3 top-3 text-ink-light"><MapPin size={20} /></div>
+                    <input 
+                      type="number" 
+                      placeholder="Długość geograficzna (np. 21.0)"
+                      required
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      className="w-full bg-white border border-ink p-3 pl-10 focus:outline-none focus:ring-2 focus:ring-accent font-sans"
+                    />
+                  </div>
+                  </>
                 )}
               </div>
             )}
 
             {/* Standard Fields */}
-            <div className="relative">
-              <div className="absolute left-3 top-3 text-ink-light"><Mail size={20} /></div>
-              <input 
-                type="email" 
-                placeholder="Adres E-mail"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white border border-ink p-3 pl-10 focus:outline-none focus:ring-2 focus:ring-accent font-sans"
-              />
-            </div>
+            {(mode === 'LOGIN' || (mode === 'REGISTER' && role === 'CLIENT')) && (
+              <div className="relative">
+                <div className="absolute left-3 top-3 text-ink-light"><User size={20} /></div> {/* Changed Mail to User icon */}
+                <input 
+                  type="text" // Changed type to text
+                  placeholder={
+                    mode === 'LOGIN' 
+                      ? (role === 'CLIENT' ? "Nazwa Użytkownika" : "Nazwa Sklepu") 
+                      : "Adres E-mail" // Keep email for client registration as it is for now
+                  }
+                  required
+                  value={usernameOrName} // Changed value
+                  onChange={(e) => setUsernameOrName(e.target.value)} // Changed onChange
+                  className="w-full bg-white border border-ink p-3 pl-10 focus:outline-none focus:ring-2 focus:ring-accent font-sans"
+                />
+              </div>
+            )}
 
             <div className="relative">
               <div className="absolute left-3 top-3 text-ink-light"><Lock size={20} /></div>
@@ -188,38 +222,13 @@ const AuthPanel: React.FC = () => {
 
           </form>
 
-          {/* Demo Login Section */}
-          <div className="mt-8 pt-6 border-t border-dashed border-ink/30">
-            <p className="text-center text-[10px] uppercase font-bold tracking-widest text-ink-light mb-4">
-              Szybki Dostęp (Demo)
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-                <button 
-                    type="button"
-                    onClick={() => handleDemoLogin('CLIENT')}
-                    disabled={isLoading}
-                    className="flex flex-col items-center justify-center p-3 border border-ink/30 hover:bg-highlight hover:border-ink transition-all text-xs group"
-                >
-                    <span className="font-bold text-ink mb-1 group-hover:text-accent">Jan (Klient)</span>
-                    <span className="text-[10px] text-ink-light">jan@zerowaste.pl</span>
-                </button>
-                <button 
-                    type="button"
-                    onClick={() => handleDemoLogin('STORE')}
-                    disabled={isLoading}
-                    className="flex flex-col items-center justify-center p-3 border border-ink/30 hover:bg-highlight hover:border-ink transition-all text-xs group"
-                >
-                    <span className="font-bold text-ink mb-1 group-hover:text-accent">Eko (Sklep)</span>
-                    <span className="text-[10px] text-ink-light">sklep@zerowaste.pl</span>
-                </button>
-            </div>
-          </div>
+
 
         </div>
         
         {/* Footer info */}
         <div className="bg-highlight p-4 text-center border-t border-ink text-xs text-ink-light">
-          Chronimy Twoje dane zgodnie z polityką prywatności ZeroWaste.
+          Zapoznaj się z naszą <Link to="/privacy-policy" className="underline">polityką prywatności</Link>.
         </div>
 
       </div>
@@ -227,4 +236,4 @@ const AuthPanel: React.FC = () => {
   );
 };
 
-export default AuthPanel;
+

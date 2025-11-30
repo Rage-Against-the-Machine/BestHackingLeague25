@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProducts } from '../contexts/ProductContext';
-import ProductCard from '../components/ProductCard';
+import GazetkaCard from '../components/GazetkaCard';
 import { Store, ArrowLeft } from 'lucide-react';
 
 const StoreDetailsPage = () => {
@@ -32,7 +32,7 @@ const StoreDetailsPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {storeProducts.map(product => (
-                    <ProductCard 
+                    <GazetkaCard 
                         key={product.id} 
                         product={product} 
                     />

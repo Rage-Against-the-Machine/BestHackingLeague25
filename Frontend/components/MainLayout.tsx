@@ -9,6 +9,7 @@ import AuthPage from '../pages/AuthPage';
 import StorePanelPage from '../pages/StorePanelPage';
 import ClientPanelPage from '../pages/ClientPanelPage';
 import StoreDetailsPage from '../pages/StoreDetailsPage';
+import PrivacyPolicyPage from '../pages/PrivacyPolicyPage';
 import { 
   ShoppingBag, User, LogOut, Map as MapIcon, ChevronDown, 
   LayoutDashboard, Trophy
@@ -43,7 +44,7 @@ const Header = () => {
         <div className="flex justify-between items-end pt-6 pb-4 border-b-4 border-double border-ink bg-transparent transition-all">
           <div className="flex flex-col md:flex-row items-end gap-4">
             <Link to="/" className="cursor-pointer">
-              <div className="text-[10px] font-bold tracking-[0.4em] uppercase mb-1 text-ink-light pl-1">Magazyn Zero Waste</div>
+              <div className="text-[10px] font-bold tracking-[0.4em] uppercase mb-1 text-ink-light pl-1">Gazetka</div>
               <h1 className="text-4xl md:text-6xl font-serif font-black tracking-tighter leading-none">
                 GAZETKA
               </h1>
@@ -101,6 +102,7 @@ const MainLayout = () => {
                     <Route path="/panel" element={<ClientPanelPage />} />
                     <Route path="/store-panel" element={<StorePanelPage />} />
                     <Route path="/store/:storeName" element={<StoreDetailsPage />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 </Routes>
             </main>
         </div>

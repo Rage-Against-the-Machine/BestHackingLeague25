@@ -3,12 +3,12 @@ import React from 'react';
 import { Product } from '../types';
 import { Clock, MapPin, Store, Navigation, Hash } from 'lucide-react';
 
-interface ProductCardProps {
+interface GazetkaCardProps {
   product: Product;
   distance?: number | null;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, distance }) => {
+const GazetkaCard: React.FC<GazetkaCardProps> = ({ product, distance }) => {
   const expiry = new Date(product.expiryDate);
   const now = new Date();
   
@@ -105,12 +105,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, distance }) => {
         {/* Right Column: Stamp Image */}
         <div className="w-24 shrink-0 flex flex-col gap-2">
           <div className="aspect-square w-full border-2 border-ink p-1 bg-white rotate-2 shadow-sm group-hover:rotate-0 transition-all duration-300">
-             <img 
-               src={product.imageUrl} 
-               alt={product.name}
-               className="w-full h-full object-cover"
-             />
-          </div>
+                          <img
+                            src={product.imageUrl || undefined}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />          </div>
           <div className="text-center">
              <span className="bg-ink text-paper text-xs font-bold px-1 py-0.5">
                -{product.discountPercentage}%
@@ -124,4 +123,4 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, distance }) => {
 };
 
 
-export default ProductCard;
+export default GazetkaCard;

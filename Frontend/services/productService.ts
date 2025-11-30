@@ -1,69 +1,112 @@
-
 import { Product, ProductCategory } from "../types";
 
-// In-memory "Database"
-let productsInMemory: Product[] = [];
+const API_BASE_URL = '/api';
 
-// Helper to simulate network delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// Helper to transform backend product to frontend Product
+const transformProduct = (backendProduct: any): Product => {
+  const originalPrice = backendProduct.price_original;
+  const discountPrice = backendProduct.price_users;
+  
+  const discountPercentage = originalPrice > 0 
+    ? Math.round(((originalPrice - discountPrice) / originalPrice) * 100)
+    : 0;
+
+  const coordinates = (backendProduct.location && Array.isArray(backendProduct.location) && backendProduct.location.length >= 2)
+    ? {
+        lat: backendProduct.location[0],
+        lng: backendProduct.location[1],
+      }
+    : undefined;
+
+  return {
+    id: backendProduct.id,
+    name: backendProduct.name,
+    category: backendProduct.category as ProductCategory, // Assuming category strings match enum values
+    originalPrice: originalPrice,
+    discountPrice: discountPrice,
+    expiryDate: backendProduct.exp_date,
+    storeName: backendProduct.store, // Use 'store' directly from backend
+    storeId: backendProduct.store_id ? backendProduct.store_id.toString() : undefined, // Add storeId, convert to string
+    storeLocation: backendProduct.city, // Use city directly from backend
+    imageUrl: backendProduct.photo_url,
+    discountPercentage: discountPercentage,
+    quantity: backendProduct.quantity,
+    coordinates: coordinates,
+  };
+};
 
 export const productService = {
   /**
    * Fetch all products (Simulates GET /products)
    */
   getAllProducts: async (): Promise<Product[]> => {
-    await delay(300); // Simulate network latency
-    return [...productsInMemory];
+    const response = await fetch(`${API_BASE_URL}/products`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch products');
+    }
+    const data = await response.json();
+    // console.log('Products returned by getAllProducts:', data); // Removed debugging line
+    return data.map(transformProduct);
   },
 
   /**
    * Add a new product (Simulates POST /products)
    */
-  addProduct: async (product: Product): Promise<Product> => {
-    await delay(300);
-    // Ensure unique ID if not provided
-    const newProduct = { 
-        ...product, 
-        id: product.id || Date.now().toString() 
-    };
-    productsInMemory.unshift(newProduct); // Add to top
-    return newProduct;
+  addProduct: async (product: Omit<Product, 'id' | 'discountPercentage'> & {store_id: number | null, EAN: string, series: string}): Promise<Product> => {
+    const response = await fetch(`${API_BASE_URL}/add-product`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: product.name,
+            series: product.series,
+            price_original: product.originalPrice,
+            price_users: product.discountPrice,
+            exp_date: product.expiryDate,
+            EAN: product.EAN,
+            category: product.category,
+            store_id: product.store_id,
+            quantity: product.quantity,
+            photo_url: product.imageUrl
+        }),
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Failed to add product: ${errorBody}`);
+    }
+
+    const newProduct = await response.json();
+    return transformProduct(newProduct);
   },
 
   /**
    * Update an existing product (Simulates PUT /products/:id)
+   * !!! Backend endpoint not available !!!
    */
   updateProduct: async (updatedProduct: Product): Promise<Product> => {
-    await delay(300);
-    const index = productsInMemory.findIndex(p => p.id === updatedProduct.id);
-    if (index !== -1) {
-      productsInMemory[index] = updatedProduct;
-      return updatedProduct;
-    }
-    throw new Error(`Product with id ${updatedProduct.id} not found`);
+    console.warn('Backend endpoint for updating products is not available.');
+    // Keep original mocked functionality but with a warning
+    return updatedProduct;
   },
 
-  /**
-   * Delete a product (Simulates DELETE /products/:id)
-   */
-  deleteProduct: async (id: string): Promise<void> => {
-    await delay(300);
-    const initialLength = productsInMemory.length;
-    productsInMemory = productsInMemory.filter(p => p.id !== id);
-    
-    if (productsInMemory.length === initialLength) {
-        throw new Error(`Product with id ${id} not found`);
-    }
-  },
 
   /**
-   * Initialize with some sample data if empty (Optional, for demo)
+   * Delete a product by its ID.
    */
-  initializeDemoData: async () => {
-    if (productsInMemory.length === 0) {
-       // Only add data if empty to prevent duplicates on hot reload
-       // We leave this empty based on user request to remove mocks, 
-       // but the structure exists if needed.
+  deleteProduct: async (id: string, keep?: number): Promise<void> => {
+    let url = `${API_BASE_URL}/delete-product?product_id=${id}`;
+    if (keep !== undefined) {
+      url += `&keep=${keep}`;
     }
-  }
+
+    const response = await fetch(url);
+    // console.log('Delete product response:', response); // Removed debugging line
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Failed to delete product: ${errorBody}`);
+    }
+  },
 };

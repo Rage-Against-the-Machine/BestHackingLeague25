@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Product, ProductCategory } from '../types';
 import Modal from './Modal';
-import { Plus, Save, Calendar, DollarSign, Hash } from 'lucide-react';
+import { Plus, Save, Calendar, DollarSign, Hash, Barcode } from 'lucide-react';
 import ImageUploader from './ImageUploader';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (product: Product) => void;
   editingProduct: Product | null;
-  storeName: string;
 }
 
-const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, onSubmit, editingProduct, storeName }) => {
+const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, onSubmit, editingProduct }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     category: ProductCategory.OTHER,
@@ -20,7 +21,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
     discountPrice: '',
     expiryDays: 1,
     quantity: 1,
-    imageUrl: ''
+    imageUrl: '',
+    ean: ''
   });
 
   useEffect(() => {
@@ -34,7 +36,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
           discountPrice: editingProduct.discountPrice.toString(),
           expiryDays: daysLeft > 0 ? daysLeft : 1,
           quantity: editingProduct.quantity || 1,
-          imageUrl: editingProduct.imageUrl || ''
+          imageUrl: editingProduct.imageUrl || '',
+          ean: editingProduct.ean || ''
         });
       } else {
         // Reset for new product
@@ -45,7 +48,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
           discountPrice: '',
           expiryDays: 1,
           quantity: 1,
-          imageUrl: ''
+          imageUrl: '',
+          ean: ''
         });
       }
     }
@@ -53,10 +57,22 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      console.error("Użytkownik nie jest zalogowany, nie można dodać produktu.");
+      return;
+    }
+
     const original = parseFloat(formData.originalPrice);
     const discount = parseFloat(formData.discountPrice);
     
     const defaultCoords = { lat: 52.2297 + (Math.random() * 0.05), lng: 21.0122 + (Math.random() * 0.05) };
+
+    const now = new Date();
+    const expiryDate = new Date(now.getTime() + (formData.expiryDays * 86400000)); // Calculate future date
+    const year = expiryDate.getFullYear();
+    const month = String(expiryDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const day = String(expiryDate.getDate()).padStart(2, '0');
+    const formattedExpiryDate = `${year}-${month}-${day}`;
 
     const productPayload: Product = {
       id: editingProduct ? editingProduct.id : '',
@@ -66,11 +82,13 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
       discountPrice: discount,
       quantity: formData.quantity,
       discountPercentage: Math.round(((original - discount) / original) * 100),
-      expiryDate: new Date(Date.now() + (formData.expiryDays * 86400000)).toISOString(),
-      storeName: storeName,
+      expiryDate: formattedExpiryDate, // Use formatted date
+      storeName: user.name, // Użyj nazwy sklepu z kontekstu
+      storeId: user.storeId, // Użyj ID sklepu z kontekstu
       storeLocation: editingProduct ? editingProduct.storeLocation : 'Warszawa (Centrum)',
       imageUrl: formData.imageUrl,
-      coordinates: editingProduct ? editingProduct.coordinates : defaultCoords
+      coordinates: editingProduct ? editingProduct.coordinates : defaultCoords,
+      ean: formData.ean
     };
 
     onSubmit(productPayload);
@@ -140,6 +158,21 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose, on
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-xs font-black uppercase tracking-widest mb-2 text-ink">Kod EAN</label>
+            <div className="relative">
+              <Barcode size={16} className="absolute left-3 top-4 text-ink-light" />
+              <input 
+                type="text" 
+                value={formData.ean}
+                onChange={e => setFormData({...formData, ean: e.target.value})}
+                className="w-full bg-white text-ink border-2 border-ink p-3 pl-9 focus:outline-none focus:border-accent"
+                placeholder="np. 5900000000000"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-black uppercase tracking-widest mb-2 text-ink">Ilość (szt.)</label>

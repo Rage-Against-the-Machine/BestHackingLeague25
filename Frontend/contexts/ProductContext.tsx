@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, ReactNode, FC, useEffect, useCallback } from 'react';
 import { Product } from '../types';
 import { productService } from '../services/productService';
+import { useAuth } from './AuthContext'; // Import useAuth
 
 interface ProductContextType {
     products: Product[];
@@ -17,7 +18,6 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export const ProductProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
     const fetchProducts = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -31,7 +31,14 @@ export const ProductProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }, []);
 
     const addProduct = async (product: Product) => {
-        await productService.addProduct(product);
+        // Transform the frontend Product object to the backend-expected format
+        const backendProductPayload = {
+            ...product,
+            store_id: product.storeId ? parseInt(product.storeId, 10) : null, // Convert to number, handle null
+            EAN: product.ean || '',
+            series: 'default-series' // Backend requires this field, using a placeholder
+        };
+        await productService.addProduct(backendProductPayload);
         await fetchProducts();
     };
 
