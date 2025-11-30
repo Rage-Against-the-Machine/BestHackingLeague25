@@ -73,13 +73,10 @@ def add_store():
         "city" : location.get_city()
     }), 200
 
-from datetime import datetime
-
 @app.route('/products', methods=['GET'])
 def get_products():
     output_list = database.get_products_dicts()
     return jsonify(output_list)
-
 
 @app.post('/add-product')
 def add_product():

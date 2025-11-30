@@ -4,11 +4,11 @@ class Location:
     def __init__(self, latitude, longitude):
         self.lat = latitude
         self.lon = longitude
-        self.geointerpreter = Nominatim(user_agent="geoapi")
     
     def get_city(self):
         try:
-            location = self.geointerpreter.reverse((self.lat, self.lon), language="en")
+            geointerpreter = Nominatim(user_agent="geoapi")
+            location = geointerpreter.reverse((self.lat, self.lon), language="en")
             address = location.raw.get("address", {})
             
             return (address.get("city") or
@@ -21,7 +21,8 @@ class Location:
     
     def get_province(self):
         try:
-            location = self.geointerpreter.reverse((self.lat, self.lon), language="en")
+            geointerpreter = Nominatim(user_agent="geoapi")
+            location = geointerpreter.reverse((self.lat, self.lon), language="en")
             address = location.raw.get("address", {})
             
             return address.get("state") or address.get("region") or "Unknown"
