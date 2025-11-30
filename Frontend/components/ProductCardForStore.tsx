@@ -80,24 +80,23 @@ const ProductCardForStore: React.FC<ProductCardForStoreProps> = ({ product }) =>
 
             <div className="mt-4 pt-4 border-t-2 border-dashed border-ink/20">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                    <button onClick={() => handleQuantityChange(-1)} className="p-2 border-2 border-ink rounded-full w-10 h-10 flex items-center justify-center hover:bg-ink/10 transition-colors">
+                    <button onClick={() => handleQuantityChange(-1)} className="p-2 border-2 border-ink bg-paper w-10 h-10 flex items-center justify-center hover:bg-ink/5 transition-colors shadow-sm">
                         <Minus size={16} />
                     </button>
                     <input 
                         type="number" 
                         value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, Math.min(product.quantity, parseInt(e.target.value) || 1)))}
-                        className="w-16 h-10 text-center font-bold border-2 border-ink bg-paper rounded-lg"
                         readOnly
+                        className="w-16 h-10 text-center font-bold font-serif text-lg border-2 border-ink bg-paper"
                     />
-                    <button onClick={() => handleQuantityChange(1)} className="p-2 border-2 border-ink rounded-full w-10 h-10 flex items-center justify-center hover:bg-ink/10 transition-colors">
+                    <button onClick={() => handleQuantityChange(1)} className="p-2 border-2 border-ink bg-paper w-10 h-10 flex items-center justify-center hover:bg-ink/5 transition-colors shadow-sm">
                         <Plus size={16} />
                     </button>
                 </div>
 
                 <button 
                     onClick={handleAddToList}
-                    className="w-full bg-ink text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-ink/80 transition-colors shadow-paper"
+                    className="w-full bg-ink text-white font-bold py-2.5 px-4 flex items-center justify-center gap-2 hover:bg-ink/80 transition-colors shadow-paper border-2 border-ink"
                 >
                     <ShoppingCart size={16} />
                     Dodaj do listy
