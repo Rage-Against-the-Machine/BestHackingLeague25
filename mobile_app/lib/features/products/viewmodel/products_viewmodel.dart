@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,9 @@ class ProductsViewmodel extends ChangeNotifier {
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  bool _hasTimeoutError = false;
+  bool get hasTimeoutError => _hasTimeoutError;
 
   List<Product> _products = [];
   List<Product> get productsList => _products;
@@ -35,27 +39,41 @@ class ProductsViewmodel extends ChangeNotifier {
     if (_isLoading) return;
 
     _isLoading = true;
+    _hasTimeoutError = false;
     notifyListeners();
 
     try {
       final uri = Uri.parse(_baseUrl);
-      final response = await http.get(uri);
+
+      final response = await http
+          .get(uri)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              throw TimeoutException(
+                'Nie udało się pobrać danych w ciągu 5 sekund.',
+              );
+            },
+          );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         final List<Product> fetchedProducts = data
             .map((item) => Product.fromJson(item))
             .toList();
-        print(fetchedProducts[0].name);
         _products = fetchedProducts;
-        notifyListeners();
       } else {
         throw Exception(
           'Failed to load products. Status code: ${response.statusCode}',
         );
       }
+    } on TimeoutException {
+      print('Error fetching products: Timeout after 5 seconds');
+      _products = [];
+      _hasTimeoutError = true;
     } catch (e) {
       print('Error fetching products: $e');
+      _products = [];
     } finally {
       _isLoading = false;
       notifyListeners();

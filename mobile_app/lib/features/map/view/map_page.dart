@@ -5,38 +5,35 @@ import 'package:mobile_app/features/map/viewModel/map_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class MapPage extends StatelessWidget {
+  const MapPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => MapViewModel(),
-      child: Consumer<MapViewModel>(
-        builder: (context, vm, _) {
-          return FlutterMap(
-            options: MapOptions(
-              initialCenter: LatLng(52.2297, 21.0122),
-              initialZoom: 15,
+    return Consumer<MapViewModel>(
+      builder: (context, vm, _) {
+        if (vm.isLocating && vm.userLocation == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final LatLng initialCenter =
+            vm.userLocation ?? const LatLng(52.2297, 22.0122);
+
+        return FlutterMap(
+          options: MapOptions(
+            initialCenter: initialCenter,
+            initialZoom: vm.userLocation != null ? 5 : 15,
+          ),
+
+          children: [
+            TileLayer(
+              urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              subdomains: const ['a', 'b', 'c'],
             ),
 
-            children: [
-              TileLayer(
-                urlTemplate:
-                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                subdomains: ['a', 'b', 'c'],
-              ),
-              MarkerLayer(
-                markers: vm.locations.map((loc) {
-                  return Marker(
-                    width: 80.0,
-                    height: 80.0,
-                    point: LatLng(loc.lat, loc.lng),
-                    child: Icon(Icons.location_on, color: Colors.red, size: 40),
-                  );
-                }).toList(),
-              ),
-            ],
-          );
-        },
-      ),
+            MarkerLayer(markers: vm.getUserMarker() + vm.getAllMarkers()),
+          ],
+        );
+      },
     );
   }
 }
