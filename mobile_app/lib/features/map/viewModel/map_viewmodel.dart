@@ -3,34 +3,69 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mobile_app/features/navigation/viewmodel/navigation_viewmodel.dart';
 import 'package:mobile_app/features/products/viewmodel/products_viewmodel.dart';
+import 'package:mobile_app/features/profile/viewModel/user_viewmodel.dart';
+import 'package:provider/provider.dart';
+import 'package:mobile_app/features/map/view/heartbeat_marker.dart';
 
 class MarkerData {
   final LatLng position;
   final String label;
   final String productName;
   final String productId;
+  final bool isInRange;
 
   const MarkerData({
     required this.position,
     required this.label,
     required this.productName,
     required this.productId,
+    required this.isInRange,
   });
 }
 
 class MapViewModel extends ChangeNotifier {
   final ProductsViewmodel productsViewModel;
 
-  LatLng? _userLocation;
-  LatLng? get userLocation => _userLocation;
+  UserViewModel? _userViewModel;
 
-  bool _isLocating = false;
-  bool get isLocating => _isLocating;
+  LatLng? get userLocation => _userViewModel?.userLocation;
+  bool get isLocating => _userViewModel?.isLocating ?? false;
+  double get maxDistanceKm => _userViewModel?.maxDistanceKm ?? 10.0;
 
   MapViewModel({required this.productsViewModel}) {
     productsViewModel.addListener(_onProductsUpdated);
-    _fetchUserLocation();
+  }
+
+  Function(LatLng, double)? _onMoveMap;
+
+  void setMoveMapCallback(Function(LatLng, double) callback) {
+    _onMoveMap = callback;
+  }
+
+  void moveToUserLocation() {
+    if (_userViewModel?.userLocation != null && _onMoveMap != null) {
+      _onMoveMap!(_userViewModel!.userLocation!, 14.0);
+    }
+  }
+
+  void setMaxDistanceKm(double distance) {
+    _userViewModel?.setMaxDistanceKm(distance);
+  }
+
+  void update(UserViewModel userViewModel) {
+    final oldLocation = _userViewModel?.userLocation;
+    _userViewModel = userViewModel;
+
+    // Trigger zoom if location wasn't available before but is now
+    if (oldLocation == null && userViewModel.userLocation != null) {
+      // Small delay to ensure map is ready if this happens during init
+      Future.delayed(const Duration(milliseconds: 500), () {
+        moveToUserLocation();
+      });
+    }
+    notifyListeners();
   }
 
   @override
@@ -43,111 +78,128 @@ class MapViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _fetchUserLocation() async {
-    _isLocating = true;
-    notifyListeners();
 
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        throw Exception('Usługi lokalizacyjne są wyłączone.');
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied ||
-            permission == LocationPermission.deniedForever) {
-          throw Exception('Brak uprawnień do lokalizacji.');
-        }
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
-      );
-
-      _userLocation = LatLng(position.latitude, position.longitude);
-    } catch (e) {
-      print("Błąd pobierania lokalizacji: $e");
-      _userLocation = const LatLng(52.2297, 21.0122);
-    } finally {
-      _isLocating = false;
-      notifyListeners();
-    }
-  }
 
   List<MarkerData> get markerData {
-    return productsViewModel.productsList
-        .map(
-          (p) => MarkerData(
+    final userLoc = _userViewModel?.userLocation;
+    final maxDist = maxDistanceKm;
+    final Distance distanceCalculator = const Distance();
+
+    return productsViewModel.allProducts
+        .map((p) {
+          bool inRange = false;
+          if (userLoc != null) {
+            final productLoc = LatLng(p.location[0], p.location[1]);
+            final distMeters = distanceCalculator.as(LengthUnit.Meter, userLoc, productLoc);
+            inRange = distMeters <= (maxDist * 1000);
+          } else {
+            // If no user location, show everything as out of range or handle differently?
+            // For now let's assume out of range if no location, or maybe in range?
+            // If we don't know where user is, we can't really say it's "in range" of the circle.
+            inRange = false; 
+          }
+
+          return MarkerData(
             position: LatLng(p.location[0], p.location[1]),
             label: p.store,
             productName: p.name,
             productId: p.id,
-          ),
-        )
+            isInRange: inRange,
+          );
+        })
         .toList();
   }
 
-  List<Marker> getAllMarkers() {
+  List<Marker> getAllMarkers(BuildContext context) {
     final List<Marker> markers = [];
     markers.addAll(
       markerData.map((marker) {
+        if (!marker.isInRange) {
+          // Render simple dot for out-of-range stores
+          return Marker(
+            width: 12.0,
+            height: 12.0,
+            point: marker.position,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Render full marker for in-range stores
         return Marker(
           width: 140.0,
           height: 80.0,
           point: marker.position,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Card(
-                color: Colors.white,
-                elevation: 4.0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 4.0,
-                  ),
-                  child: Text(
-                    marker.label,
-                    style: const TextStyle(
-                      fontSize: 12.0,
-                      color: Colors.black87,
+          child: GestureDetector(
+            onTap: () {
+              // 1. Filter products by store
+              context.read<ProductsViewmodel>().filterByStore(marker.label);
+              // 2. Navigate to Products tab
+              context.read<NavigationViewModel>().setIndex(0);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Card(
+                  color: Colors.white,
+                  elevation: 4.0,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    child: Text(
+                      marker.label,
+                      style: const TextStyle(
+                        fontSize: 12.0,
+                        color: Colors.black87,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 6.0),
+                const SizedBox(height: 6.0),
 
-              Container(
-                width: 12.0,
-                height: 12.0,
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
+                Container(
+                  width: 12.0,
+                  height: 12.0,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 2,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       }),
     );
 
-    if (_userLocation != null) {
+    if (userLocation != null) {
       markers.add(
         Marker(
           width: 60.0,
           height: 60.0,
-          point: _userLocation!,
+          point: userLocation!,
           child: const Icon(Icons.my_location, color: Colors.red, size: 30),
         ),
       );
@@ -157,13 +209,13 @@ class MapViewModel extends ChangeNotifier {
   }
 
   List<Marker> getUserMarker() {
-    if (_userLocation != null) {
+    if (userLocation != null) {
       return [
         Marker(
           width: 60.0,
           height: 60.0,
-          point: _userLocation!,
-          child: const Icon(Icons.my_location, color: Colors.red, size: 30),
+          point: userLocation!,
+          child: const HeartbeatMarker(),
         ),
       ];
     }

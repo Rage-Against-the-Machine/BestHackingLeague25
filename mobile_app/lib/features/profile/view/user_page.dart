@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/theme/app_colors.dart';
 import 'package:mobile_app/core/theme/app_typography.dart';
-import 'package:mobile_app/features/profile/viewModel/user_viewModel.dart';
+import 'package:mobile_app/features/profile/viewModel/user_viewmodel.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class UserPage extends StatefulWidget {
-  final UserViewModel userViewModel;
-  const UserPage({super.key, required this.userViewModel});
+  const UserPage({super.key});
 
   @override
   State<UserPage> createState() => _UserPageState();
@@ -14,7 +14,6 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   final TextEditingController _usernameController = TextEditingController();
-
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoggingIn = false;
@@ -33,40 +32,39 @@ class _UserPageState extends State<UserPage> {
     });
 
     final String username = _usernameController.text.trim();
-    final String password =
-        _passwordController.text; // Hasło nie powinno być trimowane
+    final String password = _passwordController.text;
 
     try {
-      // 1. Walidacja loginu i hasła
-      final bool validated = await widget.userViewModel.validateLogin(
+      final userViewModel = context.read<UserViewModel>();
+      final bool validated = await userViewModel.validateLogin(
         username: username,
         password: password,
       );
 
       if (validated) {
-        // 2. Jeśli walidacja się powiodła, pobieramy dane użytkownika
-        await widget.userViewModel.fetchUser(username: username);
+        await userViewModel.fetchUser(username: username);
       } else {
-        // 3. Walidacja nie powiodła się
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('Błąd logowania: Niepoprawny login lub hasło.'),
+              backgroundColor: AppColors.statusCritical,
             ),
           );
         }
       }
     } catch (e) {
-      // Obsługa błędów sieci, serwera itp.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Błąd połączenia. Spróbuj ponownie.')),
+          const SnackBar(content: Text('Błąd połączenia. Spróbuj ponownie.')),
         );
       }
     } finally {
-      setState(() {
-        _isLoggingIn = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoggingIn = false;
+        });
+      }
     }
   }
 
@@ -76,20 +74,19 @@ class _UserPageState extends State<UserPage> {
     });
 
     try {
-      await widget.userViewModel.logout();
-      // Czyścimy lokalne pola
+      await context.read<UserViewModel>().logout();
       _usernameController.clear();
       _passwordController.clear();
 
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Pomyślnie wylogowano.')));
+        ).showSnackBar(const SnackBar(content: Text('Pomyślnie wylogowano.')));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Wylogowanie nie powiodło się.')),
+          const SnackBar(content: Text('Wylogowanie nie powiodło się.')),
         );
       }
     } finally {
@@ -101,119 +98,117 @@ class _UserPageState extends State<UserPage> {
     }
   }
 
-  // Nowy widget dla Slidera
-  Widget _buildDistanceSlider(
-    double currentDistance,
-    ValueSetter<double> onDistanceChanged,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              'Maksymalna odległość sklepu: ${currentDistance.round()} km',
-              style: AppTypography.price.copyWith(color: AppColors.textPrimary),
-            ),
-          ),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.accent,
-              inactiveTrackColor: AppColors.productCardText,
-              thumbColor: AppColors.accent,
-              overlayColor: AppColors.accent.withOpacity(0.1),
-              valueIndicatorColor: AppColors.accent,
-              showValueIndicator: ShowValueIndicator.always,
-              trackHeight: 8.0,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
-            ),
-            child: Slider(
-              value: currentDistance,
-              min: 1.0,
-              max: 50.0,
-              divisions: 49,
-              label: '${currentDistance.round()} km',
-
-              onChanged: (double newValue) {
-                onDistanceChanged(newValue);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLoginView() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_outline, size: 60, color: AppColors.accent),
-            const SizedBox(height: 24),
-            Text(
-              'Zaloguj się do swojego profilu',
-              style: AppTypography.headline.copyWith(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                labelText: 'Nazwa użytkownika',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.person),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Hasło',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.lock),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: _isLoggingIn ? null : _handleLogin,
-              child: _isLoggingIn
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      'Zaloguj się',
-                      style: AppTypography.productLabel.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accent.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
-            ),
-          ],
+                  ],
+                ),
+                child: const Icon(
+                  Icons.person_outline,
+                  size: 64,
+                  color: AppColors.accent,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Witaj ponownie!',
+                style: AppTypography.headline,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Zaloguj się, aby uzyskać dostęp do swojego profilu.',
+                style: AppTypography.body.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 48),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Nazwa użytkownika',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: const Icon(Icons.person, color: AppColors.accent),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Hasło',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: const Icon(Icons.lock, color: AppColors.accent),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                  shadowColor: AppColors.accent.withOpacity(0.4),
+                ),
+                onPressed: _isLoggingIn ? null : _handleLogin,
+                child: _isLoggingIn
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Zaloguj się',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -221,126 +216,144 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListenableBuilder(
-        listenable: widget.userViewModel,
-        builder: (context, child) {
-          if (widget.userViewModel.user == null) {
-            return _buildLoginView();
-          }
-          final double currentMaxDistance = widget.userViewModel.maxDistanceKm;
+    return Consumer<UserViewModel>(
+      builder: (context, userViewModel, child) {
+        if (userViewModel.user == null) {
+          return _buildLoginView();
+        }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    PopupMenuButton<String>(
-                      onSelected: (value) async {
-                        if (value == 'logout') {
-                          await _handleLogout();
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem<String>(
-                          value: 'logout',
-                          child: Row(
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Witaj,',
+                            style: AppTypography.body.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            userViewModel.username,
+                            style: AppTypography.headline.copyWith(
+                              fontSize: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        onPressed: _isLoggingOut ? null : _handleLogout,
+                        icon: _isLoggingOut
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.textSecondary,
+                                ),
+                              )
+                            : const Icon(Icons.logout_rounded),
+                        color: AppColors.textSecondary,
+                        tooltip: 'Wyloguj się',
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Savings Card
+                  SavedMoneyWidget(
+                    totalSavings: userViewModel.points.toDouble(),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Membership Card (QR)
+                  Center(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (_isLoggingOut)
-                                const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              else
-                                const Icon(Icons.logout, size: 18),
+                              Icon(
+                                Icons.stars_rounded,
+                                color: AppColors.accent,
+                                size: 24,
+                              ),
                               const SizedBox(width: 8),
-                              const Text('Wyloguj się'),
+                              Text(
+                                'KARTA GAZETKI',
+                                style: AppTypography.caption.copyWith(
+                                  letterSpacing: 1.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                      ],
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 8),
+                          const SizedBox(height: 24),
+                          QrImageView(
+                            data: userViewModel.qrData,
+                            version: QrVersions.auto,
+                            size: 200.0,
+                            gapless: true,
+                            dataModuleStyle: const QrDataModuleStyle(
+                              color: AppColors.textPrimary,
+                              dataModuleShape: QrDataModuleShape.square,
+                            ),
+                            eyeStyle: const QrEyeStyle(
+                              color: AppColors.accent,
+                              eyeShape: QrEyeShape.square,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
                           Text(
-                            widget.userViewModel.username.toUpperCase(),
-                            style: AppTypography.body,
+                            'Zeskanuj przy kasie',
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textSecondary.withOpacity(0.5),
+                            ),
                           ),
-                          Icon(
-                            Icons.arrow_drop_down,
-                            color: AppColors.textPrimary,
-                          ),
-                          const SizedBox(width: 8),
                         ],
                       ),
                     ),
-                  ],
-                ),
-                // WIDŻET OSZCZĘDNOŚCI
-                SavedMoneyWidget(
-                  totalSavings: widget.userViewModel.points.toDouble(),
-                ),
-
-                const SizedBox(height: 32),
-
-                Text(
-                  'Twój kod QR:',
-                  style: AppTypography.price.copyWith(
-                    color: AppColors.textPrimary,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                // Kod QR
-                Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(16.0),
 
-                  child: QrImageView(
-                    data: widget.userViewModel.qrData,
-                    version: QrVersions.auto,
-                    size: 220.0,
-                    gapless: true,
-                    dataModuleStyle: QrDataModuleStyle(
-                      color: AppColors.textPrimary,
-                      dataModuleShape: QrDataModuleShape.square,
-                    ),
-                    eyeStyle: QrEyeStyle(
-                      color: AppColors.accent,
-                      eyeShape: QrEyeShape.square,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Zeskanuj kod, aby potwierdzić swoją tożsamość.',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-
-                // WIDŻET SUWAKA ODLEGŁOŚCI
-                _buildDistanceSlider(
-                  currentMaxDistance,
-                  // Przekazujemy funkcję, która bezpośrednio aktualizuje ViewModel
-                  (newValue) => widget.userViewModel.setMaxDistanceKm(newValue),
-                ),
-              ],
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -352,43 +365,73 @@ class SavedMoneyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Formatowanie kwoty na string z dwoma miejscami po przecinku i walutą
     final String formattedSavings =
         '${(totalSavings / 100).toStringAsFixed(2)} PLN';
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Łącznie zaoszczędzono:',
-          style: AppTypography.price.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textSecondary,
-          ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.accent, AppColors.accent.withOpacity(0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.textUrgent,
-                border: Border.all(color: AppColors.textUrgent, width: 2),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                formattedSavings,
-                style: AppTypography.price.copyWith(
-                  fontSize: 32.0,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.productBackground,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.accent.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.savings_outlined,
+                  color: Colors.white,
+                  size: 20,
                 ),
               ),
+              const SizedBox(width: 12),
+              Text(
+                'Twoje oszczędności',
+                style: AppTypography.body.copyWith(
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            formattedSavings,
+            style: const TextStyle(
+              fontFamily: 'PlayfairDisplay',
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Dzięki wspieraniu środowiska',
+            style: AppTypography.caption.copyWith(
+              color: Colors.white.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
