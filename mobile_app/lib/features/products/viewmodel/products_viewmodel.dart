@@ -48,10 +48,10 @@ class ProductsViewmodel extends ChangeNotifier {
       final response = await http
           .get(uri)
           .timeout(
-            const Duration(seconds: 5),
+            const Duration(seconds: 20),
             onTimeout: () {
               throw TimeoutException(
-                'Nie udało się pobrać danych w ciągu 5 sekund.',
+                'Nie udało się pobrać danych w ciągu 20 sekund.',
               );
             },
           );
