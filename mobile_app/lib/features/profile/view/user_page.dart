@@ -18,6 +18,7 @@ class _UserPageState extends State<UserPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoggingIn = false;
+  bool _isLoggingOut = false;
 
   @override
   void dispose() {
@@ -32,15 +33,34 @@ class _UserPageState extends State<UserPage> {
     });
 
     final String username = _usernameController.text.trim();
+    final String password =
+        _passwordController.text; // Hasło nie powinno być trimowane
 
     try {
-      await widget.userViewModel.fetchUser(username: username);
+      // 1. Walidacja loginu i hasła
+      final bool validated = await widget.userViewModel.validateLogin(
+        username: username,
+        password: password,
+      );
+
+      if (validated) {
+        // 2. Jeśli walidacja się powiodła, pobieramy dane użytkownika
+        await widget.userViewModel.fetchUser(username: username);
+      } else {
+        // 3. Walidacja nie powiodła się
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Błąd logowania: Niepoprawny login lub hasło.'),
+            ),
+          );
+        }
+      }
     } catch (e) {
+      // Obsługa błędów sieci, serwera itp.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Błąd logowania: Niepoprawny login lub hasło.'),
-          ),
+          SnackBar(content: Text('Błąd połączenia. Spróbuj ponownie.')),
         );
       }
     } finally {
@@ -48,6 +68,82 @@ class _UserPageState extends State<UserPage> {
         _isLoggingIn = false;
       });
     }
+  }
+
+  Future<void> _handleLogout() async {
+    setState(() {
+      _isLoggingOut = true;
+    });
+
+    try {
+      await widget.userViewModel.logout();
+      // Czyścimy lokalne pola
+      _usernameController.clear();
+      _passwordController.clear();
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Pomyślnie wylogowano.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wylogowanie nie powiodło się.')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoggingOut = false;
+        });
+      }
+    }
+  }
+
+  // Nowy widget dla Slidera
+  Widget _buildDistanceSlider(
+    double currentDistance,
+    ValueSetter<double> onDistanceChanged,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Maksymalna odległość sklepu: ${currentDistance.round()} km',
+              style: AppTypography.price.copyWith(color: AppColors.textPrimary),
+            ),
+          ),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: AppColors.accent,
+              inactiveTrackColor: AppColors.productCardText,
+              thumbColor: AppColors.accent,
+              overlayColor: AppColors.accent.withOpacity(0.1),
+              valueIndicatorColor: AppColors.accent,
+              showValueIndicator: ShowValueIndicator.always,
+              trackHeight: 8.0,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
+            ),
+            child: Slider(
+              value: currentDistance,
+              min: 1.0,
+              max: 50.0,
+              divisions: 49,
+              label: '${currentDistance.round()} km',
+
+              onChanged: (double newValue) {
+                onDistanceChanged(newValue);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLoginView() {
@@ -132,79 +228,115 @@ class _UserPageState extends State<UserPage> {
           if (widget.userViewModel.user == null) {
             return _buildLoginView();
           }
+          final double currentMaxDistance = widget.userViewModel.maxDistanceKm;
 
-          return Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 24.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.person_outline_outlined,
-                          size: 32,
-                          color: AppColors.textPrimary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.userViewModel.username,
-                          style: AppTypography.productLabel.copyWith(
-                            fontSize: 24,
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    PopupMenuButton<String>(
+                      onSelected: (value) async {
+                        if (value == 'logout') {
+                          await _handleLogout();
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem<String>(
+                          value: 'logout',
+                          child: Row(
+                            children: [
+                              if (_isLoggingOut)
+                                const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              else
+                                const Icon(Icons.logout, size: 18),
+                              const SizedBox(width: 8),
+                              const Text('Wyloguj się'),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                  ),
-
-                  // WIDŻET OSZCZĘDNOŚCI (przeniesiony na górę, jest ważniejszy niż QR)
-                  SavedMoneyWidget(
-                    totalSavings: widget.userViewModel.points.toDouble(),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Kod QR
-                  Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: QrImageView(
-                      data: widget.userViewModel.qrData,
-                      version: QrVersions.auto,
-                      size: 220.0,
-                      gapless: true,
-                      dataModuleStyle: QrDataModuleStyle(
-                        color: AppColors.textPrimary,
-                        dataModuleShape: QrDataModuleShape.square,
-                      ),
-                      eyeStyle: QrEyeStyle(
-                        color: AppColors.accent,
-                        eyeShape: QrEyeShape.square,
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 8),
+                          Text(
+                            widget.userViewModel.username.toUpperCase(),
+                            style: AppTypography.body,
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.textPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                       ),
                     ),
+                  ],
+                ),
+                // WIDŻET OSZCZĘDNOŚCI
+                SavedMoneyWidget(
+                  totalSavings: widget.userViewModel.points.toDouble(),
+                ),
+
+                const SizedBox(height: 32),
+
+                Text(
+                  'Twój kod QR:',
+                  style: AppTypography.price.copyWith(
+                    color: AppColors.textPrimary,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Zeskanuj kod, aby potwierdzić swoją tożsamość.',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
+                  textAlign: TextAlign.center,
+                ),
+                // Kod QR
+                Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(16.0),
+
+                  child: QrImageView(
+                    data: widget.userViewModel.qrData,
+                    version: QrVersions.auto,
+                    size: 220.0,
+                    gapless: true,
+                    dataModuleStyle: QrDataModuleStyle(
+                      color: AppColors.textPrimary,
+                      dataModuleShape: QrDataModuleShape.square,
                     ),
-                    textAlign: TextAlign.center,
+                    eyeStyle: QrEyeStyle(
+                      color: AppColors.accent,
+                      eyeShape: QrEyeShape.square,
+                    ),
                   ),
-                ],
-              ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Zeskanuj kod, aby potwierdzić swoją tożsamość.',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+
+                // WIDŻET SUWAKA ODLEGŁOŚCI
+                _buildDistanceSlider(
+                  currentMaxDistance,
+                  // Przekazujemy funkcję, która bezpośrednio aktualizuje ViewModel
+                  (newValue) => widget.userViewModel.setMaxDistanceKm(newValue),
+                ),
+              ],
             ),
           );
         },
@@ -221,37 +353,42 @@ class SavedMoneyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Formatowanie kwoty na string z dwoma miejscami po przecinku i walutą
-    final String formattedSavings = '${totalSavings.toStringAsFixed(2)} PLN';
+    final String formattedSavings =
+        '${(totalSavings / 100).toStringAsFixed(2)} PLN';
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.discountBadgeBackground,
-          width: 1.5,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Łącznie zaoszczędzono:',
+          style: AppTypography.price.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textSecondary,
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Łącznie zaoszczędzono:'.toUpperCase(),
-            style: AppTypography.caption.copyWith(
-              fontSize: 14,
-              color: AppColors.textSecondary,
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.textUrgent,
+                border: Border.all(color: AppColors.textUrgent, width: 2),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                formattedSavings,
+                style: AppTypography.price.copyWith(
+                  fontSize: 32.0,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.productBackground,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            formattedSavings,
-            style: AppTypography.price.copyWith(
-              fontSize: 32.0, // Duża czcionka, by podkreślić wartość
-              fontWeight: FontWeight.w900,
-              color: AppColors.discountBadgeBackground,
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }
