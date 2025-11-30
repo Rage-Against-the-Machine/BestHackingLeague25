@@ -1,3 +1,4 @@
+// Model class representing a product in the shop
 class Product {
   final String id;
   final String name;
@@ -11,7 +12,6 @@ class Product {
   final int storeId;
   final int quantity;
   final String photoUrl;
-
   Product({
     required this.id,
     required this.name,
@@ -26,15 +26,13 @@ class Product {
     required this.quantity,
     required this.photoUrl,
   });
-
   factory Product.fromJson(Map<String, dynamic> json) {
     final List<dynamic>? rawLocation = json['location'] as List<dynamic>?;
-
     final List<double> parsedLocation = [];
     if (rawLocation != null && rawLocation.length >= 2) {
       try {
-        parsedLocation.add((rawLocation[0] as num).toDouble()); // Latitude
-        parsedLocation.add((rawLocation[1] as num).toDouble()); // Longitude
+        parsedLocation.add((rawLocation[0] as num).toDouble());
+        parsedLocation.add((rawLocation[1] as num).toDouble());
       } catch (e) {
         print('Error parsing location coordinates: $e');
       }
@@ -42,7 +40,6 @@ class Product {
     if (parsedLocation.isEmpty) {
       parsedLocation.addAll([0.0, 0.0]);
     }
-
     return Product(
       id: json['id'] as String,
       name: json['name'] as String,

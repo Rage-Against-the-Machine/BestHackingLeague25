@@ -4,6 +4,7 @@ import 'package:mobile_app/core/theme/app_typography.dart';
 import 'package:mobile_app/features/products/model/product.dart';
 import 'package:mobile_app/features/shopping_list/viewmodel/shopping_list_viewmodel.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -13,7 +14,6 @@ class ProductCard extends StatelessWidget {
     required this.product,
     required this.discountPercent,
   });
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ShoppingListViewModel>(
@@ -35,7 +35,7 @@ class ProductCard extends StatelessWidget {
                   ? Border.all(color: Colors.black12, width: 2)
                   : Border.all(color: Colors.transparent, width: 0),
               boxShadow: isSelected
-                  ? [] // No shadow for "pressed" look
+                  ? []
                   : [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
@@ -48,7 +48,6 @@ class ProductCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image Section with Badge Overlay
                   Stack(
                     children: [
                       Container(
@@ -63,6 +62,19 @@ class ProductCard extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   width: 120,
                                   height: 120,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Shimmer.fromColors(
+                                      baseColor: Colors.grey[300]!,
+                                      highlightColor: Colors.grey[100]!,
+                                      child: Container(
+                                        width: 120,
+                                        height: 120,
+                                        color: Colors.white,
+                                      ),
+                                    );
+                                  },
                                   errorBuilder: (_, __, ___) => Container(
                                     color: AppColors.accent.withAlpha(30),
                                     alignment: Alignment.center,
@@ -110,8 +122,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
-                  // Content Section
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0, 12, 8, 12),
@@ -128,8 +138,6 @@ class ProductCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 8),
-                          
-                          // Metadata Row 1: Store
                           Row(
                             children: [
                               const Icon(
@@ -148,7 +156,6 @@ class ProductCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          // Metadata Row 2: Date
                           Row(
                             children: [
                               const Icon(
@@ -164,7 +171,6 @@ class ProductCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          // Metadata Row 3: Quantity
                           Row(
                             children: [
                               const Icon(
@@ -183,8 +189,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Price Section (Right Column)
                   Padding(
                     padding: const EdgeInsets.only(
                       top: 12,
@@ -204,9 +208,7 @@ class ProductCard extends StatelessWidget {
                         ),
                         Text(
                           '${product.priceUsers.toStringAsFixed(2)} PLN',
-                          style: AppTypography.price.copyWith(
-                            fontSize: 20,
-                          ),
+                          style: AppTypography.price.copyWith(fontSize: 20),
                         ),
                       ],
                     ),

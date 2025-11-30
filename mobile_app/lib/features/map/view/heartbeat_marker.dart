@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class HeartbeatMarker extends StatefulWidget {
   const HeartbeatMarker({super.key});
-
   @override
   State<HeartbeatMarker> createState() => _HeartbeatMarkerState();
 }
@@ -11,7 +10,6 @@ class _HeartbeatMarkerState extends State<HeartbeatMarker>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
-
   @override
   void initState() {
     super.initState();
@@ -19,10 +17,10 @@ class _HeartbeatMarkerState extends State<HeartbeatMarker>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
-
-    _animation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -36,7 +34,6 @@ class _HeartbeatMarkerState extends State<HeartbeatMarker>
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Pulsing ring
         AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {
@@ -50,7 +47,6 @@ class _HeartbeatMarkerState extends State<HeartbeatMarker>
             );
           },
         ),
-        // Central dot/icon
         Container(
           width: 20,
           height: 20,

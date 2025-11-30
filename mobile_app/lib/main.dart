@@ -7,11 +7,14 @@ import 'package:mobile_app/features/products/view/products_page.dart';
 import 'package:mobile_app/features/products/viewmodel/products_viewmodel.dart';
 import 'package:mobile_app/features/profile/view/user_page.dart';
 import 'package:mobile_app/features/profile/viewModel/user_viewmodel.dart';
+import 'package:mobile_app/features/ranking/view/ranking_page.dart';
+import 'package:mobile_app/features/ranking/viewmodel/ranking_viewmodel.dart';
 import 'package:mobile_app/features/shopping_list/view/shopping_list_page.dart';
 import 'package:mobile_app/features/shopping_list/viewmodel/shopping_list_viewmodel.dart';
 import 'package:mobile_app/features/navigation/viewmodel/navigation_viewmodel.dart';
 import 'package:provider/provider.dart';
 
+// Entry point of the application
 void main() {
   runApp(
     MultiProvider(
@@ -19,6 +22,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => NavigationViewModel()),
         ChangeNotifierProvider(create: (_) => ShoppingListViewModel()),
         ChangeNotifierProvider(create: (_) => UserViewModel()),
+        ChangeNotifierProvider(create: (_) => RankingViewModel()),
         ChangeNotifierProxyProvider<UserViewModel, ProductsViewmodel>(
           create: (_) => ProductsViewmodel(),
           update: (_, userViewModel, productsViewModel) =>
@@ -32,7 +36,6 @@ void main() {
               mapViewModel!..update(userViewModel),
         ),
       ],
-
       child: const MyApp(),
     ),
   );
@@ -40,7 +43,6 @@ void main() {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
-
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -50,13 +52,12 @@ class _MyAppState extends State<MyApp> {
     ProductsPage(),
     MapPage(),
     ShoppingListPage(),
+    RankingPage(),
     UserPage(),
   ];
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Pamiętaj, aby upewnić się, że AppTheme.lightTheme.colorScheme jest poprawnie zdefiniowany
       theme: ThemeData(colorScheme: AppTheme.lightTheme.colorScheme),
       title: 'GAZETKA',
       debugShowCheckedModeBanner: false,
@@ -125,6 +126,17 @@ class _MyAppState extends State<MyApp> {
                     ),
                     NavigationDestination(
                       icon: const Icon(
+                        Icons.leaderboard_outlined,
+                        color: AppColors.textSecondary,
+                      ),
+                      selectedIcon: const Icon(
+                        Icons.leaderboard,
+                        color: Colors.white,
+                      ),
+                      label: 'Ranking',
+                    ),
+                    NavigationDestination(
+                      icon: const Icon(
                         Icons.person_outline,
                         color: AppColors.textSecondary,
                       ),
@@ -138,7 +150,6 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
             ),
-
             body: _pages[navViewModel.selectedIndex],
           );
         },
