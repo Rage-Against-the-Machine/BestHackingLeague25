@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext, ReactNode, FC } from 'react';
+import React, { createContext, useState, useContext, ReactNode, FC, useEffect } from 'react';
 import { userService } from '../services/userService';
 import { UserProfile } from '../types';
 
@@ -19,7 +19,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<UserProfile | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // Start with loading true
+
+    useEffect(() => {
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            }
+        } catch (error) {
+            console.error("Failed to parse user from localStorage", error);
+            setUser(null);
+            localStorage.removeItem('user');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
     const userRole: UserRole = user?.role || 'GUEST';
     const userName = user?.name || '';
@@ -28,9 +43,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setIsLoading(true);
         try {
             const loggedInUser = await userService.login(username, password, role);
+            localStorage.setItem('user', JSON.stringify(loggedInUser));
             setUser(loggedInUser);
             return loggedInUser;
         } catch(e) {
+            localStorage.removeItem('user');
             throw e;
         } finally {
             setIsLoading(false);
@@ -41,9 +58,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setIsLoading(true);
         try {
             const newUser = await userService.register(email, password, name, role, location);
+            localStorage.setItem('user', JSON.stringify(newUser));
             setUser(newUser);
             return newUser;
         } catch(e) {
+            localStorage.removeItem('user');
             throw e;
         } finally {
             setIsLoading(false);
@@ -52,6 +71,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     const logout = () => {
         setUser(null);
+        localStorage.removeItem('user');
     };
 
     const value = {
@@ -66,7 +86,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {children}
+            {!isLoading && children}
         </AuthContext.Provider>
     );
 };
