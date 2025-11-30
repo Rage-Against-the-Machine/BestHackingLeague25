@@ -17,11 +17,7 @@ DB_URL = "mongodb://user:password@localhost:27017/"
 if len(sys.argv) > 1 and sys.argv[1] == "docker":
     DB_URL = "mongodb://user:password@mongodb:27017/"
 
-
 database = DatabaseInterface(DB_URL, "gazetka_main")
-
-users = get_all_users(database)
-products = get_all_products(database)
 
 app = Flask(__name__)
 CORS(app)
@@ -202,11 +198,14 @@ def delete_product():
     global database
     product_id = request.args.get('product_id', type=str)
     keep_quantity = request.args.get('keep', default=0, type=int)
-    product_db = database.get_product(product_id)
-    if product_db == None:
-        return jsonify({"error" : "product not existing"})
-    product_db.quantity = keep_quantity
-    database.update_prod_quantity(product_db, addition=False)
+    if keep_quantity == 0:
+        database.delete("products", {"id" : product_id})
+    else:
+        product_db = database.get_product(product_id)
+        if product_db == None:
+            return jsonify({"error" : "product not existing"})
+        product_db.quantity = keep_quantity
+        database.update_prod_quantity(product_db, addition=False)
     return jsonify({"done" : "ok"})
 
 
