@@ -39,6 +39,7 @@ class User:
     def prepare_dict(self):
         return dict({
             "username" : self.username,
+            "password" : self.password,
             "email" : self.email,
             "points" : self.points
         })

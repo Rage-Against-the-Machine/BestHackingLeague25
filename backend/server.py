@@ -170,30 +170,6 @@ def get_user_info():
     return jsonify(user_dict)
 
 
-@app.route('/validate-user', methods=["GET"])
-def validate_user():
-    username = request.args.get('username', default=None, type=str)
-    password = request.args.get('password', default=None, type=str)
-    user = database.get_user(username)
-    if password == user.password:
-        return jsonify({"validated?" : "true"})
-    else:
-        return jsonify({"validated?" : "false"})
-    
-
-@app.route('/delete-product', methods=["GET"])
-def delete_product():
-    global products
-    global database
-    product_id = request.args.get('product_id', type=str)
-    keep_quantity = request.args.get('keep', default=0, type=int)
-    product_db = database.get_product(product_id)
-    product_db.quantity = keep_quantity
-    database.update_prod_quantity(product_db, addition=False)
-    products = get_all_products(database)
-    return jsonify({"done" : "ok"})
-
-
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
 
 # from classes.qr_codes import QR_code
