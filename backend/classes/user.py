@@ -11,7 +11,6 @@ class User:
 
     @classmethod
     def from_database(cls, doc):
-        print(doc)
         return cls(
             username = doc["username"],
             email = doc["email"],

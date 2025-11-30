@@ -20,13 +20,13 @@ if len(sys.argv) > 1 and sys.argv[1] == "docker":
 
 database = DatabaseInterface(DB_URL, "gazetka_main")
 
-stores = get_all_stores(database)
 users = get_all_users(database)
 products = get_all_products(database)
 
 app = Flask(__name__)
 CORS(app)
 
+stores = get_all_stores(database)
 stores_ranking = StoresRanking(stores)
 
 def store_id_available():
@@ -40,6 +40,7 @@ def store_id_available():
 @app.route('/stores-ranking', methods=['GET'])
 def get_stores_ranking():
     province = request.args.get('province', default=None, type=str)
+    stores = get_all_stores(database)
     if province == None:
         results = stores_ranking.get_ranking_list()
     else:
@@ -80,6 +81,7 @@ def add_store():
 
 @app.route('/products', methods=['GET'])
 def get_products():
+    products = get_all_products(database)
     output_list = []
     for prod in products:
         output_list.append(prod.prepare_dict())
@@ -88,7 +90,6 @@ def get_products():
 
 @app.post('/add-product')
 def add_product():
-    global products
     data = request.get_json()
     name = data.get("name")
     series = data.get("series")
@@ -106,7 +107,6 @@ def add_product():
                         category, store, quantity, photo_url)
     
     database.add_product(new_product)
-    products = get_all_products(database)
 
     return jsonify({
         "status": "ok",
@@ -145,10 +145,7 @@ def buy_product():
     database.update_user_points(user)
     database.update_store_points(store)
 
-    products = get_all_products(database)
-    users = get_all_users(database)
     stores = get_all_stores(database)
-
     stores_ranking = StoresRanking(stores)
 
     return jsonify({
@@ -203,7 +200,6 @@ def validate_user():
 
 @app.route('/delete-product', methods=["GET"])
 def delete_product():
-    global products
     global database
     product_id = request.args.get('product_id', type=str)
     keep_quantity = request.args.get('keep', default=0, type=int)
@@ -212,7 +208,6 @@ def delete_product():
         return jsonify({"error" : "product not existing"})
     product_db.quantity = keep_quantity
     database.update_prod_quantity(product_db, addition=False)
-    products = get_all_products(database)
     return jsonify({"done" : "ok"})
 
 
@@ -225,7 +220,6 @@ def add_user_endpoint():
 
     new_user = User(username, email, password)
     new_user = database.add_user(new_user)
-    users.append(new_user)
 
     return jsonify({
         "status": "ok",
@@ -263,7 +257,6 @@ def get_all_stores_endpoint():
 
 @app.post('/update-product')
 def update_product():
-    global products
     data = request.get_json()
     prod_id = data.get("id")
     name = data.get("name")
@@ -282,7 +275,6 @@ def update_product():
                         category, store, quantity, photo_url, prod_id)
     database.delete("products", {"id" : prod_id})
     database.add_product(new_product)
-    products = get_all_products(database)
 
     return jsonify({
         "status": "ok",
