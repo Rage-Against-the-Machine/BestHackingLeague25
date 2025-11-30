@@ -1,26 +1,14 @@
-// id (id)
-// name (name)
-// location - coords (location)
-// location - city (city)
-// series (series)
-// original price (price_original)
-// price for registered users (price_users)
-// expiration date (exp_date)
-// category (category)
-// store id (store_id)
-// quantity (quantity)
-// photo_url (photo_url)
-
 class Product {
   final String id;
   final String name;
-  final Map<String, dynamic> location;
+  final List<double> location;
   final String series;
   final double priceOriginal;
   final double priceUsers;
   final String expDate;
   final String category;
-  final String storeId;
+  final String store;
+  final int storeId;
   final int quantity;
   final String photoUrl;
 
@@ -33,24 +21,41 @@ class Product {
     required this.priceUsers,
     required this.expDate,
     required this.category,
+    required this.store,
     required this.storeId,
     required this.quantity,
     required this.photoUrl,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final List<dynamic>? rawLocation = json['location'] as List<dynamic>?;
+
+    final List<double> parsedLocation = [];
+    if (rawLocation != null && rawLocation.length >= 2) {
+      try {
+        parsedLocation.add((rawLocation[0] as num).toDouble()); // Latitude
+        parsedLocation.add((rawLocation[1] as num).toDouble()); // Longitude
+      } catch (e) {
+        print('Error parsing location coordinates: $e');
+      }
+    }
+    if (parsedLocation.isEmpty) {
+      parsedLocation.addAll([0.0, 0.0]);
+    }
+
     return Product(
-      id: json['id'],
-      name: json['name'],
-      location: json['location'],
-      series: json['series'],
-      priceOriginal: json['price_original'].toDouble(),
-      priceUsers: json['price_users'].toDouble(),
-      expDate: json['exp_date'],
-      category: json['category'],
-      storeId: json['store_id'],
-      quantity: json['quantity'],
-      photoUrl: json['photo_url'],
+      id: json['id'] as String,
+      name: json['name'] as String,
+      location: parsedLocation,
+      series: json['series'] as String,
+      priceOriginal: (json['price_original'] as num).toDouble(),
+      priceUsers: (json['price_users'] as num).toDouble(),
+      expDate: json['exp_date'] as String,
+      category: json['category'] as String,
+      store: json['store'] as String,
+      storeId: json['store_id'] as int,
+      quantity: json['quantity'] as int,
+      photoUrl: json['photo_url'] as String,
     );
   }
 }

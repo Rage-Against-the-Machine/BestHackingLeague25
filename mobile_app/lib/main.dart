@@ -3,11 +3,18 @@ import 'package:mobile_app/core/theme/app_colors.dart';
 import 'package:mobile_app/core/theme/app_theme.dart';
 import 'package:mobile_app/features/map/view/map_page.dart';
 import 'package:mobile_app/features/products/view/products_page.dart';
+import 'package:mobile_app/features/products/viewmodel/products_viewmodel.dart';
 import 'package:mobile_app/features/profile/view/user_page.dart';
 import 'package:mobile_app/features/profile/viewModel/user_viewModel.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ProductsViewmodel(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -44,13 +51,34 @@ class _MyAppState extends State<MyApp> {
           selectedIndex: currentPageIndex,
           indicatorColor: AppColors.accent,
 
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.discount),
+              icon: Icon(
+                Icons.discount,
+                color: currentPageIndex == 0
+                    ? AppColors.productCardText
+                    : AppColors.discountBadgeBackground,
+              ),
               label: 'Produkty',
             ),
-            NavigationDestination(icon: Icon(Icons.map), label: 'Mapa'),
-            NavigationDestination(icon: Icon(Icons.person), label: 'Profil'),
+            NavigationDestination(
+              icon: Icon(
+                Icons.map,
+                color: currentPageIndex == 1
+                    ? AppColors.productCardText
+                    : AppColors.discountBadgeBackground,
+              ),
+              label: 'Mapa',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.person,
+                color: currentPageIndex == 2
+                    ? AppColors.productCardText
+                    : AppColors.discountBadgeBackground,
+              ),
+              label: 'Profil',
+            ),
           ],
         ),
 
