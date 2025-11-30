@@ -179,6 +179,19 @@ def validate_user():
         return jsonify({"validated?" : "true"})
     else:
         return jsonify({"validated?" : "false"})
+    
+
+@app.route('/delete-product', methods=["GET"])
+def delete_product():
+    global products
+    global database
+    product_id = request.args.get('product_id', type=str)
+    keep_quantity = request.args.get('keep', default=0, type=int)
+    product_db = database.get_product(product_id)
+    product_db.quantity = keep_quantity
+    database.update_prod_quantity(product_db, addition=False)
+    products = get_all_products(database)
+    return jsonify({"done" : "ok"})
 
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)

@@ -83,3 +83,11 @@ PORT = ```6969```
     - ```username``` - username of user
     - ```email``` - email of user
     - ```points``` - user's points
+
+
+### ```/delete-product``` [GET]
+- Arguments:
+    - ```product_id``` - ID of the product you want to reduce
+    - ```keep``` - how many items of the product you want to keep. Optional, default 0.
+- Actions:
+    - Deletes product from database
