@@ -45,6 +45,8 @@ def get_stores_ranking():
 
 @app.post('/add-store')
 def add_store():
+    global stores
+    global stores_ranking
     data = request.get_json()
     name = data.get("name")
     location_raw = data.get("location")
@@ -57,7 +59,8 @@ def add_store():
     new_store = Store(id, name, location, password)
     database.add_store(new_store)
     stores.append(new_store)
-    stores_ranking.add_store(new_store)
+    
+    stores_ranking = StoresRanking(stores)
 
     return jsonify({
         "status": "ok",
