@@ -8,10 +8,15 @@ from classes.qr_codes import QR_code
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
+import sys
 
 
 SERVING_PORT = 6969
 DB_URL = "mongodb://user:password@localhost:27017/"
+
+if len(sys.argv) > 1 and sys.argv[1] == "docker":
+    DB_URL = "mongodb://user:password@mongodb:27017/"
+
 
 database = DatabaseInterface(DB_URL, "gazetka_main")
 
@@ -238,5 +243,39 @@ def get_all_stores_endpoint():
         without_pass.pop("password")
         stores_data.append(without_pass)
     return jsonify(stores_data)
+
+@app.post('/update-product')
+def update_product():
+    global products
+    data = request.get_json()
+    prod_id = data.get("id")
+    name = data.get("name")
+    series = data.get("series")
+    price_original = data.get("price_original")
+    price_users = data.get("price_users")
+    exp_date = data.get("exp_date")
+    EAN = data.get("EAN")
+    category = data.get("category")
+    store_id = data.get("store_id")
+    quantity = data.get("quantity")
+    photo_url = data.get("photo_url", "None")
+
+    store = database.get_store(store_id)
+    new_product = Product(name, series, price_original, price_users, exp_date, EAN, 
+                        category, store, quantity, photo_url, prod_id)
+    
+    database.delete("products", {"id" : prod_id})
+    database.add_product(new_product)
+    products = get_all_products(database)
+
+    return jsonify({
+        "status": "ok",
+        "received": {
+            "id" : new_product.id, 
+            "EAN" : new_product.EAN, 
+            "quantity" : new_product.quantity,
+            "store_name" : new_product.store.name
+        }
+    }), 200
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)

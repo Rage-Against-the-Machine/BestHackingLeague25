@@ -2,7 +2,7 @@ from classes.store import Store
 from classes.database_interface import DatabaseInterface
 
 class Product:
-    def __init__(self, name, series, price_original, price_users, exp_date, EAN, category, store : Store, quantity, photo_url):
+    def __init__(self, name, series, price_original, price_users, exp_date, EAN, category, store : Store, quantity, photo_url, id=None):
         self.name = name
         self.series = series
         self.price_original = price_original
@@ -13,7 +13,7 @@ class Product:
         self.store = store
         self.quantity = quantity
         self.photo_url = photo_url
-        self.id = f"{self.store.id}_{self.EAN}_{self.series}_{round(100*float(self.price_users))}"
+        self.id = f"{self.store.id}_{self.EAN}_{self.series}_{round(100*float(self.price_users))}" if id==None else id
 
     @classmethod
     def from_database(cls, doc, database : DatabaseInterface):

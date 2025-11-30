@@ -37,6 +37,7 @@ PORT = ```6969```
         - expiration date (```exp_date```)
         - category (```category```)
         - store id (```store_id```)
+        - store name (```store```)
         - quantity (```quantity```)
         - photo_url (```photo_url```)
 
@@ -128,3 +129,18 @@ PORT = ```6969```
         - location (coords) (```location```)
         - store ID (```id```)
         - city (```city```)
+
+### ```/update-product``` [POST]
+- Overwrites the existing product
+- Arguments:
+    - ```id``` - existing product's ID
+    - ```name``` - product's name
+    - ```series``` - product's series
+    - ```price_original``` - original price
+    - ```price_users``` - price for registered users
+    - ```exp_date``` - expiration date
+    - ```EAN``` - EAN code
+    - ```category``` - product's category
+    - ```store_id``` - ID of the store registering the product
+    - ```quantity``` - quantity of the product
+    - ```photo_url``` - URL to product's image

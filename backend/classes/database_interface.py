@@ -76,20 +76,20 @@ class DatabaseInterface:
     def update_prod_quantity(self, product, addition = True):
         collection = self.database["products"]
         if addition:
+            from classes.product import Product
+            current_prod = Product.from_database(self.find("products", {"id": product.id})[0], self)
+            collection.update_one(
+                {"id": current_prod.id},
+                {"$set": {"quantity": current_prod.quantity + product.quantity}}
+            )
+        else:
             if product.quantity == 0:
                 collection.delete_one({"id": product.id})
             else:
-                from classes.product import Product
-                current_prod = Product.from_database(self.find("products", {"id": product.id})[0], self)
                 collection.update_one(
-                    {"id": current_prod.id},
-                    {"$set": {"quantity": current_prod.quantity + product.quantity}}
-                )
-        else:
-            collection.update_one(
-                    {"id": product.id},
-                    {"$set": {"quantity": product.quantity}}
-                )
+                        {"id": product.id},
+                        {"$set": {"quantity": product.quantity}}
+                    )
 
 
     def add_product(self, product):
