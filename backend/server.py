@@ -63,16 +63,14 @@ def add_store():
     database.add_store(new_store)
     stores.append(new_store)
     
-    stores_ranking = StoresRanking(stores)
+    stores_ranking.add_to_end(new_store)
 
     return jsonify({
         "status": "ok",
-        "received": {
-            "id" : id,
-            "name": name,
-            "location": location.get_coords(),
-            "city" : location.get_city()
-        }
+        "id" : id,
+        "name": name,
+        "location": location.get_coords(),
+        "city" : location.get_city()
     }), 200
 
 from datetime import datetime
@@ -116,9 +114,7 @@ def add_product():
 
 @app.post('/buy-product')
 def buy_product():
-    global products
     global database
-    global users
     global stores
     global stores_ranking
     data = request.get_json()

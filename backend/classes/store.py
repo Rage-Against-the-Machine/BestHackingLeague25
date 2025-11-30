@@ -70,6 +70,9 @@ class StoresRanking:
     def add_store(self, store):
         self.stores.append(store)
     
+    def add_to_end(self, record : Store):
+        self.current_ranking.append(record)
+    
 def get_all_stores(database):
     stores_records = database.get_all_stores()
     stores_objects = []

@@ -67,7 +67,7 @@ def send_add_user_request(url, username, email, password):
     response = requests.post(url, json=payload)
     return response
 
-# send_to_endpoint_store("http://localhost:6969/add-store", "zabka", (51.1,21.1), "dupa")
+send_to_endpoint_store("http://localhost:6969/add-store", "melina", (51.1,21.1), "melina")
 
 # resp = send_to_endpoint_product(
 #     "http://localhost:6969/add-product",
