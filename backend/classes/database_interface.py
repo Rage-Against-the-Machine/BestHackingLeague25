@@ -124,4 +124,12 @@ class DatabaseInterface:
         raw_product = products_list[0]
         product = Product.from_database(raw_product, self)
         return product
+    
+    def get_products_dicts(self):
+        def delete_id(element):
+            element.pop("_id")
+            return element
+        products = [delete_id(x) for x in self.get_all_products()]
+        return products
+
 

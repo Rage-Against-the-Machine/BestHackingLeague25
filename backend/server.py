@@ -78,13 +78,12 @@ def add_store():
         }
     }), 200
 
+from datetime import datetime
 
 @app.route('/products', methods=['GET'])
 def get_products():
-    products = get_all_products(database)
-    output_list = []
-    for prod in products:
-        output_list.append(prod.prepare_dict())
+    output_list = database.get_products_dicts()
+    print(output_list)
     return jsonify(output_list)
 
 

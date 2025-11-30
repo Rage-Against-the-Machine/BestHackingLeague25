@@ -69,30 +69,30 @@ def send_add_user_request(url, username, email, password):
 
 # send_to_endpoint_store("http://localhost:6969/add-store", "zabka", (51.1,21.1), "dupa")
 
-resp = send_to_endpoint_product(
-    "http://localhost:6969/add-product",
-    name="Pepsi",
-    series="Classic",
-    price_original=5.99,
-    price_users=4.99,
-    exp_date="2025-12-01",
-    EAN="1234567890123",
-    category="Drinks",
-    store_id=0,
-    quantity=10,
-    photo_url="https://example.com/photo.jpg"
-)
+# resp = send_to_endpoint_product(
+#     "http://localhost:6969/add-product",
+#     name="Zoladkowa Gorzka",
+#     series="Classic",
+#     price_original=5.99,
+#     price_users=4.99,
+#     exp_date="2025-12-01",
+#     EAN="21376969",
+#     category="Drinks",
+#     store_id=0,
+#     quantity=10,
+#     photo_url="https://example.com/photo.jpg"
+# )
 
 # print(resp.status_code)
 # print(resp.json())
 
-resp = send_buy_product_request(
-    "http://localhost:6969/buy-product",
-    code="julek_20251130043352",
-    product_id="0_1234567890123_Classic_499",
-    quantity=5,
-    store_id=0
-)
+# resp = send_buy_product_request(
+#     "http://localhost:6969/buy-product",
+#     code="julek_20251130043352",
+#     product_id="0_1234567890123_Classic_499",
+#     quantity=5,
+#     store_id=0
+# )
 
 # resp = send_add_user_request(
 #     "http://localhost:6969/add-user",
@@ -107,6 +107,8 @@ resp = send_buy_product_request(
 #     email = "roszczyk@mock",
 #     password = "dupa"
 # )
+
+
 
 # print(resp.status_code)
 # print(resp.json())
