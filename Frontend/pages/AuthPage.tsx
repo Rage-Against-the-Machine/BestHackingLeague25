@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthPanel from '../components/AuthPanel';
+import { AuthPanel } from '../components/AuthPanel';
 import { useAuth } from '../contexts/AuthContext';
 
 const AuthPage = () => {

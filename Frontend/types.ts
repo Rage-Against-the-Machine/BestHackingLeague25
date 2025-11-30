@@ -15,6 +15,8 @@ export interface Product {
     lat: number;
     lng: number;
   };
+  ean?: string;
+  storeId?: string;
 }
 
 export enum ProductCategory {
@@ -43,6 +45,7 @@ export interface UserProfile {
   name: string; // Imie i nazwisko LUB Nazwa Sklepu
   role: 'CLIENT' | 'STORE';
   location?: string; // Tylko dla sklepów
+  storeId?: string; // Tylko dla sklepów
 }
 
 export interface RankingEntry {

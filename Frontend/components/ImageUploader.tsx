@@ -92,7 +92,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUploadComplete, initial
         if (preview) {
           return (
             <>
-              <img src={preview} alt="Podgląd" className="w-full h-full object-cover" />
+              <img src={preview || undefined} alt="Podgląd" className="w-full h-full object-cover" />
               <button 
                 onClick={removeImage}
                 className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/75 transition-colors z-10"

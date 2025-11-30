@@ -40,7 +40,7 @@ const RankingView: React.FC = () => {
         <div className="grid grid-cols-12 gap-4 border-b-2 border-ink pb-2 text-xs font-bold uppercase tracking-widest text-ink-light mb-4 px-2">
           <div className="col-span-1 text-center">#</div>
           <div className="col-span-6">Sklep</div>
-          <div className="col-span-3 text-right">Uratowane KG</div>
+          <div className="col-span-3 text-right">Uratowane</div>
           <div className="col-span-2 text-right">Wynik</div>
         </div>
 
@@ -69,7 +69,7 @@ const RankingView: React.FC = () => {
 
                 {/* Stats */}
                 <div className="col-span-3 text-right font-sans">
-                  <div className="font-bold">{store.saved} kg</div>
+                  <div className="font-bold">{store.saved}</div>
                 </div>
 
                 {/* Score */}

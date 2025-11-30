@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Product, ProductCategory } from '../types';
 import { useProducts } from '../contexts/ProductContext';
-import ProductCard from '../components/ProductCard';
+import GazetkaCard from '../components/GazetkaCard';
 import { Loader2, Filter, Navigation, Search, X, Package, Milk, Croissant, Apple, Beef, CupSoda, Utensils, LayoutGrid } from 'lucide-react';
 
 type SortMode = 'DEFAULT' | 'DISTANCE';
@@ -253,7 +253,7 @@ const HomePage = () => {
             {!isLoadingData && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {processedProducts.map(product => (
-                  <ProductCard 
+                  <GazetkaCard 
                     key={product.id} 
                     product={product} 
                     distance={product.distance}

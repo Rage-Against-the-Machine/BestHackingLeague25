@@ -1,19 +1,27 @@
-
 import { RankingEntry } from "../types";
 
-const MOCK_RANKING_DATA: RankingEntry[] = [
-    { id: 1, name: 'Biedronka', location: 'ul. Marszałkowska 10', score: 98, saved: 1240 },
-    { id: 2, name: 'Lidl', location: 'Al. Jerozolimskie 50', score: 95, saved: 980 },
-    { id: 3, name: 'Lokalny Warzywniak', location: 'Rynek Główny 5', score: 92, saved: 450 },
-    { id: 4, name: 'Carrefour', location: 'Złote Tarasy', score: 88, saved: 760 },
-    { id: 5, name: 'Żabka', location: 'ul. Poznańska 3', score: 85, saved: 320 },
-];
+const API_BASE_URL = 'http://100.82.90.77:6969';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const transformRanking = (backendEntry: any): RankingEntry => ({
+  id: backendEntry.store_id,
+  name: backendEntry.name,
+  location: backendEntry.city,
+  score: backendEntry.points,
+  saved: 0, // 'saved' is not provided by the backend, default to 0
+});
+
 
 export const rankingService = {
-    getRanking: async (): Promise<RankingEntry[]> => {
-        await delay(500);
-        return MOCK_RANKING_DATA;
+    getRanking: async (province?: string): Promise<RankingEntry[]> => {
+        let url = `${API_BASE_URL}/stores-ranking`;
+        if (province) {
+            url += `?province=${encodeURIComponent(province)}`;
+        }
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch ranking');
+        }
+        const data = await response.json();
+        return data.map(transformRanking);
     }
 };
