@@ -49,6 +49,80 @@ class ProductsPage extends StatelessWidget {
               ),
               child: Text('GAZETKA', style: AppTypography.headline),
             ),
+            // Category Chips
+            Consumer<ProductsViewmodel>(
+              builder: (context, viewModel, child) {
+                return SizedBox(
+                  height: 50,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: viewModel.categories.length,
+                    itemBuilder: (context, index) {
+                      final category = viewModel.categories[index];
+                      final isSelected =
+                          viewModel.selectedCategory == category;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: ChoiceChip(
+                          label: Text(
+                            category.toUpperCase(),
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              viewModel.setCategory(category);
+                            }
+                          },
+                          selectedColor: AppColors.accent,
+                          backgroundColor: AppColors.productBackground,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? AppColors.accent
+                                  : AppColors.productCardText,
+                            ),
+                          ),
+                          showCheckmark: false,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            Consumer<ProductsViewmodel>(
+              builder: (context, viewModel, child) {
+                if (viewModel.selectedStore != null) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        InputChip(
+                          label: Text('Sklep: ${viewModel.selectedStore}'),
+                          onDeleted: () {
+                            viewModel.clearStoreFilter();
+                          },
+                          deleteIcon: const Icon(Icons.close, size: 18),
+                          backgroundColor: AppColors.accent.withOpacity(0.1),
+                          labelStyle: TextStyle(color: AppColors.accent),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             Expanded(
               child: Consumer<ProductsViewmodel>(
                 builder: (context, viewModel, child) {
