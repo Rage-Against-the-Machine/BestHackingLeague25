@@ -270,12 +270,10 @@ def update_product():
 
     return jsonify({
         "status": "ok",
-        "received": {
-            "id" : new_product.id, 
-            "EAN" : new_product.EAN, 
-            "quantity" : new_product.quantity,
-            "store_name" : new_product.store.name
-        }
+        "id" : new_product.id, 
+        "EAN" : new_product.EAN, 
+        "quantity" : new_product.quantity,
+        "store_name" : new_product.store.name
     }), 200
 
 app.run(debug=True, host="0.0.0.0", port=SERVING_PORT)
